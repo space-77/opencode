@@ -1,0 +1,45 @@
+{
+  "desc": [
+    "----- 这是一个翻译缓存文件 -----",
+    "----- 这是一个翻译缓存文件 -----",
+    "----- 这是一个翻译缓存文件 -----",
+    "如果您对翻译不满意可以在这里修改，在下次生成新的代码有效",
+    "注意：修改翻译后生成的代码或文件名，都随之变化，引用的地方也需要做对应的修改"
+  ],
+  "dict": [],
+  "cache": {
+    "idNames": {
+      "get_/": "App_hello",
+      "post_/containers": "Containers_create",
+      "post_/containers/{id}/start": "Containers_start",
+      "post_/containers/{id}/stop": "Containers_stop",
+      "get_/containers/{id}": "Containers_get",
+      "get_/agents": "Agents_list",
+      "get_/agents/{id}": "Agents_get",
+      "get_/proxy/{agentId}/{path}": "Proxy_withPath_get",
+      "post_/proxy/{agentId}/{path}": "Proxy_withPath_post",
+      "put_/proxy/{agentId}/{path}": "Proxy_withPath_put",
+      "delete_/proxy/{agentId}/{path}": "Proxy_withPath_delete",
+      "patch_/proxy/{agentId}/{path}": "Proxy_withPath_patch",
+      "options_/proxy/{agentId}/{path}": "Proxy_withPath_options",
+      "head_/proxy/{agentId}/{path}": "Proxy_withPath_head",
+      "search_/proxy/{agentId}/{path}": "Proxy_withPath_search",
+      "get_/proxy/{agentId}": "Proxy_root_get",
+      "post_/proxy/{agentId}": "Proxy_root_post",
+      "put_/proxy/{agentId}": "Proxy_root_put",
+      "delete_/proxy/{agentId}": "Proxy_root_delete",
+      "patch_/proxy/{agentId}": "Proxy_root_patch",
+      "options_/proxy/{agentId}": "Proxy_root_options",
+      "head_/proxy/{agentId}": "Proxy_root_head",
+      "search_/proxy/{agentId}": "Proxy_root_search",
+      "post_/heartbeat": "Heartbeat_update",
+      "get_/containers/{id}/logs": "ContainerLogs_get",
+      "get_/monitoring/metrics": "Monitoring_metrics",
+      "get_/audit/operations": "Audit_listOperations",
+      "get_/audit/operations/export": "Audit_exportOperations",
+      "get_/audit/health-checks": "Audit_listHealthChecks"
+    },
+    "returnTypeNames": {},
+    "requestTypeNames": {}
+  }
+}
