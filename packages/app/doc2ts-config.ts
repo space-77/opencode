@@ -7,6 +7,9 @@ const doc2tsConfig: Doc2TsConfig = {
   baseClassName: "ApiClient",
   baseClassPath: "./src/services/client.ts",
   resultTypeRender: 'Promise<[any, {typeName}["data"], {typeName}]>',
+  gitConfig: {
+    pushArgs: ["--no-verify"],
+  },
 }
 
 export default doc2tsConfig
