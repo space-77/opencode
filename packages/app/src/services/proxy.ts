@@ -7,9 +7,9 @@
  * ---------------------------------------------------------------
  */
 
-import type { DocReqConfig } from "doc2ts";
-import ApiClient from "./client";
-import type { Proxy as types } from "./types";
+import type { DocReqConfig } from "doc2ts"
+import ApiClient from "./client"
+import type { Proxy as types } from "./types"
 /**
  * @name proxy
  * @description proxy
@@ -21,8 +21,8 @@ export default class Proxy extends ApiClient {
    * @description 将请求透传到指定 Agent 容器的根路径。成功时直接返回容器原始响应（不包裹统一结构）；失败时返回 `{ code, data, message }`。
    */
   proxyRootGet(agentId: string) {
-    const config: DocReqConfig = { url: `/proxy/${agentId}`, method: "get" };
-    return this.request<types.RProxyRootGet>(config);
+    const config: DocReqConfig = { url: `/proxy/${agentId}`, method: "get" }
+    return this.request<types.RProxyRootGet>(config)
   }
 
   /**
@@ -31,8 +31,8 @@ export default class Proxy extends ApiClient {
    * @description 将请求透传到指定 Agent 容器的根路径。成功时直接返回容器原始响应（不包裹统一结构）；失败时返回 `{ code, data, message }`。
    */
   proxyRootPut(agentId: string) {
-    const config: DocReqConfig = { url: `/proxy/${agentId}`, method: "put" };
-    return this.request<types.RProxyRootPut>(config);
+    const config: DocReqConfig = { url: `/proxy/${agentId}`, method: "put" }
+    return this.request<types.RProxyRootPut>(config)
   }
 
   /**
@@ -41,8 +41,8 @@ export default class Proxy extends ApiClient {
    * @description 将请求透传到指定 Agent 容器的根路径。成功时直接返回容器原始响应（不包裹统一结构）；失败时返回 `{ code, data, message }`。
    */
   proxyRootPost(agentId: string) {
-    const config: DocReqConfig = { url: `/proxy/${agentId}`, method: "post" };
-    return this.request<types.RProxyRootPost>(config);
+    const config: DocReqConfig = { url: `/proxy/${agentId}`, method: "post" }
+    return this.request<types.RProxyRootPost>(config)
   }
 
   /**
@@ -51,8 +51,8 @@ export default class Proxy extends ApiClient {
    * @description 将请求透传到指定 Agent 容器的根路径。成功时直接返回容器原始响应（不包裹统一结构）；失败时返回 `{ code, data, message }`。
    */
   proxyRootHead(agentId: string) {
-    const config: DocReqConfig = { url: `/proxy/${agentId}`, method: "head" };
-    return this.request<types.RProxyRootHead>(config);
+    const config: DocReqConfig = { url: `/proxy/${agentId}`, method: "head" }
+    return this.request<types.RProxyRootHead>(config)
   }
 
   /**
@@ -61,8 +61,8 @@ export default class Proxy extends ApiClient {
    * @description 将请求透传到指定 Agent 容器的根路径。成功时直接返回容器原始响应（不包裹统一结构）；失败时返回 `{ code, data, message }`。
    */
   proxyRootPatch(agentId: string) {
-    const config: DocReqConfig = { url: `/proxy/${agentId}`, method: "patch" };
-    return this.request<types.RProxyRootPatch>(config);
+    const config: DocReqConfig = { url: `/proxy/${agentId}`, method: "patch" }
+    return this.request<types.RProxyRootPatch>(config)
   }
 
   /**
@@ -71,8 +71,8 @@ export default class Proxy extends ApiClient {
    * @description 将请求透传到指定 Agent 容器的根路径。成功时直接返回容器原始响应（不包裹统一结构）；失败时返回 `{ code, data, message }`。
    */
   proxyRootDelete(agentId: string) {
-    const config: DocReqConfig = { url: `/proxy/${agentId}`, method: "delete" };
-    return this.request<types.RProxyRootDelete>(config);
+    const config: DocReqConfig = { url: `/proxy/${agentId}`, method: "delete" }
+    return this.request<types.RProxyRootDelete>(config)
   }
 
   /**
@@ -80,9 +80,9 @@ export default class Proxy extends ApiClient {
    * @description 将请求透传到指定 Agent 容器的任意路径。成功时直接返回容器原始响应（不包裹统一结构）；失败时返回 `{ code, data, message }`。
    */
   proxyWithPathGet({ path, agentId }: types.ProxyWithPathGetParams) {
-    const url = `/proxy/${agentId}/${path}`;
-    const config: DocReqConfig = { url, method: "get" };
-    return this.request<types.RProxyWithPathGet>(config);
+    const url = `/proxy/${agentId}/${path}`
+    const config: DocReqConfig = { url, method: "get" }
+    return this.request<types.RProxyWithPathGet>(config)
   }
 
   /**
@@ -90,9 +90,9 @@ export default class Proxy extends ApiClient {
    * @description 将请求透传到指定 Agent 容器的任意路径。成功时直接返回容器原始响应（不包裹统一结构）；失败时返回 `{ code, data, message }`。
    */
   proxyWithPathPut({ path, agentId }: types.ProxyWithPathPutParams) {
-    const url = `/proxy/${agentId}/${path}`;
-    const config: DocReqConfig = { url, method: "put" };
-    return this.request<types.RProxyWithPathPut>(config);
+    const url = `/proxy/${agentId}/${path}`
+    const config: DocReqConfig = { url, method: "put" }
+    return this.request<types.RProxyWithPathPut>(config)
   }
 
   /**
@@ -104,8 +104,8 @@ export default class Proxy extends ApiClient {
     const config: DocReqConfig = {
       url: `/proxy/${agentId}`,
       method: "options",
-    };
-    return this.request<types.RProxyRootOptions>(config);
+    }
+    return this.request<types.RProxyRootOptions>(config)
   }
 
   /**
@@ -113,9 +113,9 @@ export default class Proxy extends ApiClient {
    * @description 将请求透传到指定 Agent 容器的任意路径。成功时直接返回容器原始响应（不包裹统一结构）；失败时返回 `{ code, data, message }`。
    */
   proxyWithPathPost({ path, agentId }: types.ProxyWithPathPostParams) {
-    const url = `/proxy/${agentId}/${path}`;
-    const config: DocReqConfig = { url, method: "post" };
-    return this.request<types.RProxyWithPathPost>(config);
+    const url = `/proxy/${agentId}/${path}`
+    const config: DocReqConfig = { url, method: "post" }
+    return this.request<types.RProxyWithPathPost>(config)
   }
 
   /**
@@ -123,9 +123,9 @@ export default class Proxy extends ApiClient {
    * @description 将请求透传到指定 Agent 容器的任意路径。成功时直接返回容器原始响应（不包裹统一结构）；失败时返回 `{ code, data, message }`。
    */
   proxyWithPathHead({ path, agentId }: types.ProxyWithPathHeadParams) {
-    const url = `/proxy/${agentId}/${path}`;
-    const config: DocReqConfig = { url, method: "head" };
-    return this.request<types.RProxyWithPathHead>(config);
+    const url = `/proxy/${agentId}/${path}`
+    const config: DocReqConfig = { url, method: "head" }
+    return this.request<types.RProxyWithPathHead>(config)
   }
 
   /**
@@ -133,9 +133,9 @@ export default class Proxy extends ApiClient {
    * @description 将请求透传到指定 Agent 容器的任意路径。成功时直接返回容器原始响应（不包裹统一结构）；失败时返回 `{ code, data, message }`。
    */
   proxyWithPathPatch({ path, agentId }: types.ProxyWithPathPatchParams) {
-    const url = `/proxy/${agentId}/${path}`;
-    const config: DocReqConfig = { url, method: "patch" };
-    return this.request<types.RProxyWithPathPatch>(config);
+    const url = `/proxy/${agentId}/${path}`
+    const config: DocReqConfig = { url, method: "patch" }
+    return this.request<types.RProxyWithPathPatch>(config)
   }
 
   /**
@@ -143,9 +143,9 @@ export default class Proxy extends ApiClient {
    * @description 将请求透传到指定 Agent 容器的任意路径。成功时直接返回容器原始响应（不包裹统一结构）；失败时返回 `{ code, data, message }`。
    */
   proxyWithPathDelete({ path, agentId }: types.ProxyWithPathDeleteParams) {
-    const url = `/proxy/${agentId}/${path}`;
-    const config: DocReqConfig = { url, method: "delete" };
-    return this.request<types.RProxyWithPathDelete>(config);
+    const url = `/proxy/${agentId}/${path}`
+    const config: DocReqConfig = { url, method: "delete" }
+    return this.request<types.RProxyWithPathDelete>(config)
   }
 
   /**
@@ -153,9 +153,9 @@ export default class Proxy extends ApiClient {
    * @description 将请求透传到指定 Agent 容器的任意路径。成功时直接返回容器原始响应（不包裹统一结构）；失败时返回 `{ code, data, message }`。
    */
   proxyWithPathOptions({ path, agentId }: types.ProxyWithPathOptionsParams) {
-    const url = `/proxy/${agentId}/${path}`;
-    const config: DocReqConfig = { url, method: "options" };
-    return this.request<types.RProxyWithPathOptions>(config);
+    const url = `/proxy/${agentId}/${path}`
+    const config: DocReqConfig = { url, method: "options" }
+    return this.request<types.RProxyWithPathOptions>(config)
   }
 }
-export const proxy = new Proxy();
+export const proxy = new Proxy()

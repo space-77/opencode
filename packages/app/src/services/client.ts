@@ -1,7 +1,7 @@
-import type { DocReqConfig, IApiClient } from 'doc2ts'
-import qs from 'qs'
-import service from '@/utils/axios'
-import { downloadFileStream } from '@/utils/file'
+import type { DocReqConfig, IApiClient } from "doc2ts"
+import qs from "qs"
+import service from "@/utils/axios"
+import { downloadFileStream } from "@/utils/file"
 
 export default class ApiClient implements IApiClient {
   static FETCH_MAP = new Map() // 防重复容器
@@ -23,10 +23,17 @@ export default class ApiClient implements IApiClient {
     const { responseType } = (config || {}) as any
 
     try {
-      const res = await service({ url: path, method, headers, data: body || formData, timeout: (config as any).timeout, responseType })
+      const res = await service({
+        url: path,
+        method,
+        headers,
+        data: body || formData,
+        timeout: (config as any).timeout,
+        responseType,
+      })
       const { data } = res
 
-      if (data.type === 'application/json') {
+      if (data.type === "application/json") {
         // 如果是 JSON数据， 证明这里下载失败了并不是返回文件流， 需要处理 Blob 成 JSON，提示用户下载失败
         return new Promise((_, reject) => {
           const reader = new FileReader()
@@ -34,24 +41,23 @@ export default class ApiClient implements IApiClient {
             try {
               const { code, message } = JSON.parse(e.target?.result as string)
               if (code !== 200) {
-                reject(new Error(message || '文件下载失败，请稍后重试'))
+                reject(new Error(message || "文件下载失败，请稍后重试"))
               }
             } catch {
-              reject(new Error('文件下载失败，无法解析错误信息'))
+              reject(new Error("文件下载失败，无法解析错误信息"))
             }
           }
           reader.onerror = () => {
-            reject(new Error('文件下载失败，读取错误数据失败'))
+            reject(new Error("文件下载失败，读取错误数据失败"))
           }
           reader.readAsText(data)
         })
       }
 
-      fileName = fileName || res.headers['content-disposition']?.split('=')?.[1] || 'unknown'
+      fileName = fileName || res.headers["content-disposition"]?.split("=")?.[1] || "unknown"
       try {
         fileName = decodeURIComponent(fileName as string)
-      } catch {
-      }
+      } catch {}
 
       downloadFileStream(data as Blob, fileName as string)
       return data
@@ -74,7 +80,7 @@ export default class ApiClient implements IApiClient {
     if (!(formData instanceof Object) || Array.isArray(formData)) return
     const dataList = Object.entries(formData)
 
-    if (type.startsWith('multipart/form-data')) {
+    if (type.startsWith("multipart/form-data")) {
       const fd = new FormData()
       dataList.forEach(([k, v]) => {
         if (v === undefined) return
@@ -86,7 +92,7 @@ export default class ApiClient implements IApiClient {
       })
       return fd
     }
-    if (type.startsWith('application/x-www-form-urlencoded')) {
+    if (type.startsWith("application/x-www-form-urlencoded")) {
       const fd = new URLSearchParams()
       dataList.forEach(([k, v]) => {
         if (v === undefined) return

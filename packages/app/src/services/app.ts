@@ -7,9 +7,9 @@
  * ---------------------------------------------------------------
  */
 
-import type { DocReqConfig } from "doc2ts";
-import ApiClient from "./client";
-import type { App as types } from "./types";
+import type { DocReqConfig } from "doc2ts"
+import ApiClient from "./client"
+import type { App as types } from "./types"
 /**
  * @name App
  * @description App
@@ -20,8 +20,8 @@ export default class App extends ApiClient {
    * @description 返回 API 服务的欢迎信息
    */
   appHello() {
-    const config: DocReqConfig = { url: "/", method: "get" };
-    return this.request<types.RAppHello>(config);
+    const config: DocReqConfig = { url: "/", method: "get" }
+    return this.request<types.RAppHello>(config)
   }
 }
-export const app = new App();
+export const app = new App()

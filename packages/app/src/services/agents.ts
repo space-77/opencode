@@ -7,9 +7,9 @@
  * ---------------------------------------------------------------
  */
 
-import type { DocReqConfig } from "doc2ts";
-import ApiClient from "./client";
-import type { Agents as types } from "./types";
+import type { DocReqConfig } from "doc2ts"
+import ApiClient from "./client"
+import type { Agents as types } from "./types"
 /**
  * @name agents
  * @description agents
@@ -21,8 +21,8 @@ export default class Agents extends ApiClient {
    * @description 根据 Agent ID 获取详细信息
    */
   agentsGet(id: string) {
-    const config: DocReqConfig = { url: `/agents/${id}`, method: "get" };
-    return this.request<types.RAgentsGet>(config);
+    const config: DocReqConfig = { url: `/agents/${id}`, method: "get" }
+    return this.request<types.RAgentsGet>(config)
   }
 
   /**
@@ -31,9 +31,9 @@ export default class Agents extends ApiClient {
    * @description 返回当前用户的所有 Agent，支持按类型筛选
    */
   agentsList(agentType?: AgentType) {
-    const url = `/agents?${this.serialize({ agentType })}`;
-    const config: DocReqConfig = { url, method: "get" };
-    return this.request<types.RAgentsList>(config);
+    const url = `/agents?${this.serialize({ agentType })}`
+    const config: DocReqConfig = { url, method: "get" }
+    return this.request<types.RAgentsList>(config)
   }
 }
-export const agents = new Agents();
+export const agents = new Agents()

@@ -7,9 +7,9 @@
  * ---------------------------------------------------------------
  */
 
-import type { DocReqConfig } from "doc2ts";
-import ApiClient from "./client";
-import type { Containers as types, __common__ } from "./types";
+import type { DocReqConfig } from "doc2ts"
+import ApiClient from "./client"
+import type { Containers as types, __common__ } from "./types"
 /**
  * @name containers
  * @description containers
@@ -21,8 +21,8 @@ export default class Containers extends ApiClient {
    * @description 根据容器 ID 获取详细信息
    */
   containersGet(id: string) {
-    const config: DocReqConfig = { url: `/containers/${id}`, method: "get" };
-    return this.request<types.RContainersGet>(config);
+    const config: DocReqConfig = { url: `/containers/${id}`, method: "get" }
+    return this.request<types.RContainersGet>(config)
   }
 
   /**
@@ -31,9 +31,9 @@ export default class Containers extends ApiClient {
    * @description 停止指定的容器实例
    */
   containersStop(id: string) {
-    const url = `/containers/${id}/stop`;
-    const config: DocReqConfig = { url, method: "post" };
-    return this.request<types.RContainersStop>(config);
+    const url = `/containers/${id}/stop`
+    const config: DocReqConfig = { url, method: "post" }
+    return this.request<types.RContainersStop>(config)
   }
 
   /**
@@ -42,9 +42,9 @@ export default class Containers extends ApiClient {
    * @description 启动指定的容器实例
    */
   containersStart(id: string) {
-    const url = `/containers/${id}/start`;
-    const config: DocReqConfig = { url, method: "post" };
-    return this.request<types.RContainersStart>(config);
+    const url = `/containers/${id}/start`
+    const config: DocReqConfig = { url, method: "post" }
+    return this.request<types.RContainersStart>(config)
   }
 
   /**
@@ -52,23 +52,19 @@ export default class Containers extends ApiClient {
    * @description 为用户创建一个新的 Agent 容器
    */
   containersCreate(body: __common__.CreateContainerDto) {
-    const config: DocReqConfig = { url: "/containers", body, method: "post" };
-    return this.request<types.RContainersCreate>(config);
+    const config: DocReqConfig = { url: "/containers", body, method: "post" }
+    return this.request<types.RContainersCreate>(config)
   }
 
   /**
    * @summary 创建工作区文件夹
    * @description 在容器 /workspace 目录下创建子文件夹；未指定 folderName 时使用 UUID 命名
    */
-  containersControllerCreateWorkspaceFolder(
-    params: types.ContainersControllerCreateWorkspaceFolderParams1
-  ) {
-    const { id, ...body } = params;
-    const url = `/containers/${id}/workspace/folders`;
-    const config: DocReqConfig = { url, body, method: "post" };
-    return this.request<types.RContainersControllerCreateWorkspaceFolder>(
-      config
-    );
+  containersControllerCreateWorkspaceFolder(params: types.ContainersControllerCreateWorkspaceFolderParams1) {
+    const { id, ...body } = params
+    const url = `/containers/${id}/workspace/folders`
+    const config: DocReqConfig = { url, body, method: "post" }
+    return this.request<types.RContainersControllerCreateWorkspaceFolder>(config)
   }
 
   /**
@@ -77,11 +73,9 @@ export default class Containers extends ApiClient {
    * @description 返回一个未使用的工作区目录（目录为空且无关联 session）；若无空闲工作区则自动新建
    */
   containersControllerGetAvailableWorkspace(id: string) {
-    const url = `/containers/${id}/workspace/available`;
-    const config: DocReqConfig = { url, method: "get" };
-    return this.request<types.RContainersControllerGetAvailableWorkspace>(
-      config
-    );
+    const url = `/containers/${id}/workspace/available`
+    const config: DocReqConfig = { url, method: "get" }
+    return this.request<types.RContainersControllerGetAvailableWorkspace>(config)
   }
 }
-export const containers = new Containers();
+export const containers = new Containers()
