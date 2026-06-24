@@ -30,6 +30,18 @@ export namespace EnumLists {
     "stop" = "stop",
     "delete" = "delete",
   }
+  export enum OperationResult {
+    "success" = "success",
+    "failed" = "failed",
+  }
+  export enum CheckType {
+    "container_status" = "container_status",
+    "service_health" = "service_health",
+  }
+  export enum CheckResult {
+    "success" = "success",
+    "failed" = "failed",
+  }
 }
 
 export namespace __common__ {
@@ -42,7 +54,7 @@ export namespace __common__ {
     /**
      * @description 响应数据
      */
-    data: object;
+    data: object | null;
     /**
      * @example success
      * @description 提示信息
@@ -65,9 +77,9 @@ export namespace __common__ {
      * @example abc123def456
      * @description Docker 容器 ID
      */
-    dockerContainerId: object | null;
+    dockerContainerId: string | null;
     /**
-     * @example opencode-user123-cloud
+     * @example user123-agent
      * @description 容器名称
      */
     containerName: string;
@@ -87,71 +99,71 @@ export namespace __common__ {
      */
     agentType: EnumLists.AgentType;
     /**
-     * @example v1.0.0
+     * @example 1.0.0
      * @description Agent 版本号
      */
-    agentVersion: object | null;
+    agentVersion: string | null;
     /**
      * @example /workspace
      * @description 工作目录路径
      */
     workDirectory: string;
     /**
-     * @example 3000
+     * @example 5354
      * @description 容器内部端口
      */
-    containerPort: object | null;
+    containerPort: number | null;
     /**
-     * @example 8080
+     * @example 60001
      * @description 宿主机端口
      */
-    hostPort: object | null;
+    hostPort: number | null;
     /**
-     * @example /api
+     * @example /agent-proxy/123e4567-e89b-12d3-a456-426614174000
      * @description 转发路径
      */
-    forwardPath: object | null;
+    forwardPath: string | null;
     /**
      * @example container_name
      * @description 访问模式
      */
     accessMode: EnumLists.AccessMode;
     /**
-     * @example http://localhost:8080
+     * @example http://localhost:3000/agent-proxy/123e4567-e89b-12d3-a456-426614174000
      * @description 连接 URL
      */
-    connectionUrl: object | null;
+    connectionUrl: string | null;
     /**
-     * @example 2024-01-15T10:30:00Z
+     * @example 2024-01-15T10:30:00.000Z
      * @description 最后心跳时间
      */
-    heartbeatAt: object | null;
+    heartbeatAt: string | null;
     /**
      * @example 1.0
      * @description CPU 限制
      */
-    cpuLimit: object | null;
+    cpuLimit: string | null;
     /**
      * @example 512M
      * @description 内存限制
      */
-    memoryLimit: object | null;
+    memoryLimit: string | null;
     /**
      * @example Container failed to start
      * @description 错误消息
      */
-    errorMessage: object | null;
+    errorMessage: string | null;
     /**
      * @description 健康检查失败次数
      */
     healthFailCount: number;
     /**
-     * @example 2024-01-15T10:00:00Z
+     * @example 2024-01-15T10:00:00.000Z
      * @description 创建时间
      */
     createdAt: string;
     /**
-     * @example 2024-01-15T10:30:00Z
+     * @example 2024-01-15T10:30:00.000Z
      * @description 更新时间
      */
     updatedAt: string;
@@ -170,6 +182,227 @@ export namespace __common__ {
     agentName?: string;
   }
 
+  export interface CreateWorkspaceFolderDto {
+    /**
+     * @example my-project
+     * @description 工作区子文件夹名称；不传则使用 UUID 自动生成
+     */
+    folderName?: string;
+  }
+
+  export interface WorkspaceFolderResponseDto {
+    /**
+     * @example 550e8400-e29b-41d4-a716-446655440000
+     * @description 创建的文件夹名称
+     */
+    folderName: string;
+    /**
+     * @example /workspace/550e8400-e29b-41d4-a716-446655440000
+     * @description 容器内完整路径
+     */
+    path: string;
+  }
+
+  export interface ContainerStatsDto {
+    /**
+     * @example 0.50%
+     * @description CPU 使用率
+     */
+    cpuPercent: string;
+    /**
+     * @example 0.50%
+     * @description CPU 总量
+     */
+    cpuTotal: string;
+    /**
+     * @example 1.0
+     * @description CPU 核心数限制
+     */
+    cpuCores: string;
+    /**
+     * @example 128MiB
+     * @description 内存使用量
+     */
+    memoryUsage: string;
+    /**
+     * @example 0B
+     * @description 内存缓存
+     */
+    memoryCache: string;
+    /**
+     * @example 512MiB
+     * @description 内存限制
+     */
+    memoryLimit: string;
+    /**
+     * @example 0B
+     * @description 容器大小
+     */
+    containerSize: string;
+    /**
+     * @example 0B
+     * @description 虚拟大小
+     */
+    virtualSize: string;
+  }
+
+  export interface ContainerDetailResponseDto {
+    /**
+     * @description 容器信息
+     */
+    container: {
+      /**
+       * @example 123e4567-e89b-12d3-a456-426614174000
+       * @description 容器唯一标识符 (UUID)
+       */
+      id: string;
+      /**
+       * @example user123
+       * @description 用户 ID
+       */
+      userId: string;
+      /**
+       * @example abc123def456
+       * @description Docker 容器 ID
+       */
+      dockerContainerId: string | null;
+      /**
+       * @example user123-agent
+       * @description 容器名称
+       */
+      containerName: string;
+      /**
+       * @example running
+       * @description 容器状态
+       */
+      status: Status;
+      /**
+       * @example opencode
+       * @description Agent 名称
+       */
+      agentName: string;
+      /**
+       * @example cloud
+       * @description Agent 类型
+       */
+      agentType: AgentType;
+      /**
+       * @example 1.0.0
+       * @description Agent 版本号
+       */
+      agentVersion: string | null;
+      /**
+       * @example /workspace
+       * @description 工作目录路径
+       */
+      workDirectory: string;
+      /**
+       * @example 5354
+       * @description 容器内部端口
+       */
+      containerPort: number | null;
+      /**
+       * @example 60001
+       * @description 宿主机端口
+       */
+      hostPort: number | null;
+      /**
+       * @example /agent-proxy/123e4567-e89b-12d3-a456-426614174000
+       * @description 转发路径
+       */
+      forwardPath: string | null;
+      /**
+       * @example container_name
+       * @description 访问模式
+       */
+      accessMode: AccessMode;
+      /**
+       * @example http://localhost:3000/agent-proxy/123e4567-e89b-12d3-a456-426614174000
+       * @description 连接 URL
+       */
+      connectionUrl: string | null;
+      /**
+       * @example 2024-01-15T10:30:00.000Z
+       * @description 最后心跳时间
+       */
+      heartbeatAt: string | null;
+      /**
+       * @example 1.0
+       * @description CPU 限制
+       */
+      cpuLimit: string | null;
+      /**
+       * @example 512M
+       * @description 内存限制
+       */
+      memoryLimit: string | null;
+      /**
+       * @example Container failed to start
+       * @description 错误消息
+       */
+      errorMessage: string | null;
+      /**
+       * @description 健康检查失败次数
+       */
+      healthFailCount: number;
+      /**
+       * @example 2024-01-15T10:00:00.000Z
+       * @description 创建时间
+       */
+      createdAt: string;
+      /**
+       * @example 2024-01-15T10:30:00.000Z
+       * @description 更新时间
+       */
+      updatedAt: string;
+    };
+    /**
+     * @description 容器运行时统计（仅 running 状态时有值）
+     */
+    stats: {
+      /**
+       * @example 0.50%
+       * @description CPU 使用率
+       */
+      cpuPercent: string;
+      /**
+       * @example 0.50%
+       * @description CPU 总量
+       */
+      cpuTotal: string;
+      /**
+       * @example 1.0
+       * @description CPU 核心数限制
+       */
+      cpuCores: string;
+      /**
+       * @example 128MiB
+       * @description 内存使用量
+       */
+      memoryUsage: string;
+      /**
+       * @example 0B
+       * @description 内存缓存
+       */
+      memoryCache: string;
+      /**
+       * @example 512MiB
+       * @description 内存限制
+       */
+      memoryLimit: string;
+      /**
+       * @example 0B
+       * @description 容器大小
+       */
+      containerSize: string;
+      /**
+       * @example 0B
+       * @description 虚拟大小
+       */
+      virtualSize: string;
+    } | null;
+  }
+
   export interface HeartbeatDto {
     /**
      * @example 123e4567-e89b-12d3-a456-426614174000
@@ -181,6 +414,14 @@ export namespace __common__ {
      * @description 等待时间（秒），用于长轮询
      */
     waitTime?: number;
+  }
+
+  export interface HeartbeatResponseDto {
+    /**
+     * @example 2024-01-15T10:30:00.000Z
+     * @description 更新后的心跳时间
+     */
+    heartbeatAt: string;
   }
 
   export interface ContainerLogsQueryDto {
@@ -206,32 +447,111 @@ export namespace __common__ {
     keyword?: string;
   }
 
-  export interface MetricsResponseDto {
+  export interface ContainerStatusMetricsDto {
     /**
-     * @example 45.5
-     * @description CPU 使用率（百分比）
+     * @example 10
+     * @description 容器总数
      */
-    cpuUsage: number;
-    /**
-     * @example [object Object]
-     * @description 内存使用情况
-     */
-    memory: object;
-    /**
-     * @example [object Object]
-     * @description 磁盘使用情况
-     */
-    disk: object;
+    total: number;
     /**
      * @example 5
-     * @description 活跃容器数量
+     * @description 运行中容器数
      */
-    activeContainers: number;
+    running: number;
     /**
-     * @example 3600
-     * @description 系统运行时间（秒）
+     * @example 3
+     * @description 已停止容器数
      */
-    uptime: number;
+    stopped: number;
+    /**
+     * @example 1
+     * @description 错误状态容器数
+     */
+    error: number;
+    /**
+     * @example 1
+     * @description 创建中容器数
+     */
+    pending: number;
+  }
+
+  export interface ResourceMetricsDto {
+    /**
+     * @example 1073741824
+     * @description 用户数据目录占用字节数
+     */
+    userDataBytes: number;
+  }
+
+  export interface UserMetricsDto {
+    /**
+     * @example 3
+     * @description 活跃用户数
+     */
+    active: number;
+    /**
+     * @example 8
+     * @description 总用户数
+     */
+    total: number;
+  }
+
+  export interface SystemMetricsResponseDto {
+    /**
+     * @description 容器状态统计
+     */
+    containers: {
+      /**
+       * @example 10
+       * @description 容器总数
+       */
+      total: number;
+      /**
+       * @example 5
+       * @description 运行中容器数
+       */
+      running: number;
+      /**
+       * @example 3
+       * @description 已停止容器数
+       */
+      stopped: number;
+      /**
+       * @example 1
+       * @description 错误状态容器数
+       */
+      error: number;
+      /**
+       * @example 1
+       * @description 创建中容器数
+       */
+      pending: number;
+    };
+    /**
+     * @description 资源占用统计
+     */
+    resources: {
+      /**
+       * @example 1073741824
+       * @description 用户数据目录占用字节数
+       */
+      userDataBytes: number;
+    };
+    /**
+     * @description 用户统计
+     */
+    users: {
+      /**
+       * @example 3
+       * @description 活跃用户数
+       */
+      active: number;
+      /**
+       * @example 8
+       * @description 总用户数
+       */
+      total: number;
+    };
   }
 
   export interface AuditQueryDto {
@@ -309,6 +629,219 @@ export namespace __common__ {
     filename: string;
   }
 
+  export interface OperationLogEntity {
+    /**
+     * @example 123e4567-e89b-12d3-a456-426614174000
+     * @description 日志唯一标识符 (UUID)
+     */
+    id: string;
+    /**
+     * @example user123
+     * @description 用户 ID
+     */
+    userId: string;
+    /**
+     * @example 123e4567-e89b-12d3-a456-426614174000
+     * @description 关联容器 ID
+     */
+    containerId: string | null;
+    /**
+     * @example create
+     * @description 操作类型
+     */
+    operationType: EnumLists.OperationType;
+    /**
+     * @example success
+     * @description 操作结果
+     */
+    operationResult: EnumLists.OperationResult;
+    /**
+     * @example 192.168.1.1
+     * @description 客户端 IP 地址
+     */
+    ipAddress: string | null;
+    /**
+     * @description 错误消息
+     */
+    errorMessage: string | null;
+    /**
+     * @example 2024-01-15T10:30:00.000Z
+     * @description 创建时间
+     */
+    createdAt: string;
+  }
+
+  export interface PaginatedOperationLogEntity {
+    /**
+     * @description 数据列表
+     */
+    items: Array<__common__.OperationLogEntity>;
+    /**
+     * @example 100
+     * @description 总记录数
+     */
+    total: number;
+    /**
+     * @example 1
+     * @description 当前页码
+     */
+    page: number;
+    /**
+     * @example 20
+     * @description 每页数量
+     */
+    pageSize: number;
+  }
+
+  export interface HealthCheckLogEntity {
+    /**
+     * @example 123e4567-e89b-12d3-a456-426614174000
+     * @description 日志唯一标识符 (UUID)
+     */
+    id: string;
+    /**
+     * @example 123e4567-e89b-12d3-a456-426614174000
+     * @description 容器 ID
+     */
+    containerId: string;
+    /**
+     * @example container_status
+     * @description 检查类型
+     */
+    checkType: EnumLists.CheckType;
+    /**
+     * @example success
+     * @description 检查结果
+     */
+    checkResult: EnumLists.CheckResult;
+    /**
+     * @example 150
+     * @description 响应时间（毫秒）
+     */
+    responseTime: number | null;
+    /**
+     * @description 错误消息
+     */
+    errorMessage: string | null;
+    /**
+     * @example 2024-01-15T10:30:00.000Z
+     * @description 创建时间
+     */
+    createdAt: string;
+  }
+
+  export interface PaginatedHealthCheckLogEntity {
+    /**
+     * @description 数据列表
+     */
+    items: Array<__common__.HealthCheckLogEntity>;
+    /**
+     * @example 100
+     * @description 总记录数
+     */
+    total: number;
+    /**
+     * @example 1
+     * @description 当前页码
+     */
+    page: number;
+    /**
+     * @example 20
+     * @description 每页数量
+     */
+    pageSize: number;
+  }
+
+  export interface UploadFileDto {
+    /**
+     * @example subdir/nested
+     * @description 目标子目录路径，相对于 /workspace，不指定则上传到根目录。支持传入 /workspace 或其子路径
+     */
+    targetDir?: string;
+  }
+
+  export interface UploadFileResponseDto {
+    /**
+     * @example document.pdf
+     * @description 文件名
+     */
+    filename: string;
+    /**
+     * @example /workspace/uploads/document.pdf
+     * @description 文件在工作区内的完整路径
+     */
+    path: string;
+  }
+
+  export interface InitMultipartUploadDto {
+    /**
+     * @example large-file.zip
+     * @description 文件名
+     */
+    filename: string;
+    /**
+     * @example 104857600
+     * @description 文件总大小（字节）
+     */
+    totalSize: number;
+    /**
+     * @example 10
+     * @description 总分块数
+     */
+    totalChunks: number;
+    /**
+     * @example uploads
+     * @description 目标子目录路径，相对于 /workspace，不指定则上传到根目录。支持传入 /workspace 或其子路径
+     */
+    targetDir?: string;
+  }
+
+  export interface InitUploadResponseDto {
+    /**
+     * @example 550e8400-e29b-41d4-a716-446655440000
+     * @description 上传会话 ID
+     */
+    uploadId: string;
+    /**
+     * @example 2026-06-15T10:00:00.000Z
+     * @description 会话过期时间（ISO 8601 格式）
+     */
+    expiresAt: string;
+  }
+
+  export interface UploadChunkDto {
+    /**
+     * @description 分块索引（从 0 开始）
+     */
+    chunkIndex: number;
+  }
+
+  export interface UploadChunkResponseDto {
+    /**
+     * @example 3
+     * @description 已接收的分块数
+     */
+    receivedChunks: number;
+    /**
+     * @example 10
+     * @description 总分块数
+     */
+    totalChunks: number;
+  }
+
+  export interface CompleteUploadResponseDto {
+    /**
+     * @example large-file.zip
+     * @description 文件名
+     */
+    filename: string;
+    /**
+     * @example /workspace/uploads/large-file.zip
+     * @description 文件在工作区内的完整路径
+     */
+    path: string;
+  }
+
   export interface LogsT {
     /**
      * @example 2024-01-15T10:30:00Z
@@ -326,62 +859,6 @@ export namespace __common__ {
      */
     level?: string;
   }
-
-  export interface ItemsT {
-    /**
-     * @example 123e4567-e89b-12d3-a456-426614174000
-     */
-    id?: string;
-    /**
-     * @example user123
-     */
-    userId?: string;
-    /**
-     * @example 123e4567-e89b-12d3-a456-426614174000
-     */
-    containerId?: string | null;
-    /**
-     * @example create
-     */
-    operationType?: EnumLists.OperationType;
-    /**
-     * @example success
-     */
-    operationResult?: string;
-    /**
-     * @example 192.168.1.1
-     */
-    ipAddress?: string | null;
-    errorMessage?: string | null;
-    /**
-     * @example 2024-01-15T10:30:00Z
-     */
-    createdAt?: string;
-  }
-
-  export interface ItemsT1 {
-    /**
-     * @example 123e4567-e89b-12d3-a456-426614174000
-     */
-    id?: string;
-    /**
-     * @example 123e4567-e89b-12d3-a456-426614174000
-     */
-    containerId?: string;
-    /**
-     * @example healthy
-     */
-    status?: string;
-    /**
-     * @example 150
-     */
-    responseTime?: number;
-    errorMessage?: string | null;
-    /**
-     * @example 2024-01-15T10:30:00Z
-     */
-    createdAt?: string;
-  }
 }
 
 export namespace App {
@@ -394,7 +871,10 @@ export namespace App {
      * @example success
      */
     message: string;
-    data: any | null;
+    /**
+     * @example Hello World!
+     */
+    data: string;
   }
 
   export interface AppHelloParams {}
@@ -471,10 +951,54 @@ export namespace Containers {
      * @example success
      */
     message: string;
-    data: __common__.ContainerEntity;
+    data: __common__.ContainerDetailResponseDto;
   }
 
   export interface ContainersGetParams {
+    /**
+     * @description 容器的唯一标识符 (UUID)
+     */
+    id: string;
+  }
+
+  export interface ContainersControllerCreateWorkspaceFolderRes {
+    /**
+     * @example 200
+     */
+    code: number;
+    /**
+     * @example success
+     */
+    message: string;
+    data: __common__.WorkspaceFolderResponseDto;
+  }
+
+  export interface ContainersControllerCreateWorkspaceFolderParams {
+    /**
+     * @description 容器的唯一标识符 (UUID)
+     */
+    id: string;
+  }
+
+  /**
+   * @description 可选的文件夹名称
+   */
+  export interface ContainersControllerCreateWorkspaceFolderBody
+    extends __common__.CreateWorkspaceFolderDto {}
+
+  export interface ContainersControllerGetAvailableWorkspaceRes {
+    /**
+     * @example 200
+     */
+    code: number;
+    /**
+     * @example success
+     */
+    message: string;
+    data: __common__.WorkspaceFolderResponseDto;
+  }
+
+  export interface ContainersControllerGetAvailableWorkspaceParams {
     /**
      * @description 容器的唯一标识符 (UUID)
      */
@@ -495,6 +1019,24 @@ export namespace Containers {
       any,
       Containers.ContainersCreateRes["data"],
       Containers.ContainersCreateRes
+    ]
+  >;
+  export type ContainersControllerCreateWorkspaceFolderParams1 =
+    ContainersControllerCreateWorkspaceFolderParams &
+      __common__.CreateWorkspaceFolderDto;
+
+  export type RContainersControllerCreateWorkspaceFolder = Promise<
+    [
+      any,
+      Containers.ContainersControllerCreateWorkspaceFolderRes["data"],
+      Containers.ContainersControllerCreateWorkspaceFolderRes
+    ]
+  >;
+  export type RContainersControllerGetAvailableWorkspace = Promise<
+    [
+      any,
+      Containers.ContainersControllerGetAvailableWorkspaceRes["data"],
+      Containers.ContainersControllerGetAvailableWorkspaceRes
     ]
   >;
 }
@@ -528,7 +1070,7 @@ export namespace Agents {
      * @example success
      */
     message: string;
-    data: __common__.ContainerEntity;
+    data: __common__.ContainerDetailResponseDto;
   }
 
   export interface AgentsGetParams {
@@ -546,8 +1088,8 @@ export namespace Agents {
   >;
 }
 
-export namespace Proxy {
-  export interface ProxyWithPathGetRes {
+export namespace AgentProxy {
+  export interface ProxyControllerWithPathGetRes {
     /**
      * @example 404
      */
@@ -556,10 +1098,10 @@ export namespace Proxy {
      * @example Agent 不存在或容器未运行
      */
     message: string;
-    data: any | null;
+    data: null | null;
   }
 
-  export interface ProxyWithPathGetParams {
+  export interface ProxyControllerWithPathGetParams {
     /**
      * @description Agent 的唯一标识符 (UUID)
      */
@@ -570,7 +1112,7 @@ export namespace Proxy {
     path: any;
   }
 
-  export interface ProxyWithPathPutRes {
+  export interface ProxyControllerWithPathPutRes {
     /**
      * @example 404
      */
@@ -579,10 +1121,10 @@ export namespace Proxy {
      * @example Agent 不存在或容器未运行
      */
     message: string;
-    data: any | null;
+    data: null | null;
   }
 
-  export interface ProxyWithPathPutParams {
+  export interface ProxyControllerWithPathPutParams {
     /**
      * @description Agent 的唯一标识符 (UUID)
      */
@@ -593,7 +1135,7 @@ export namespace Proxy {
     path: any;
   }
 
-  export interface ProxyWithPathPostRes {
+  export interface ProxyControllerWithPathPostRes {
     /**
      * @example 404
      */
@@ -602,10 +1144,10 @@ export namespace Proxy {
      * @example Agent 不存在或容器未运行
      */
     message: string;
-    data: any | null;
+    data: null | null;
   }
 
-  export interface ProxyWithPathPostParams {
+  export interface ProxyControllerWithPathPostParams {
     /**
      * @description Agent 的唯一标识符 (UUID)
      */
@@ -616,7 +1158,7 @@ export namespace Proxy {
     path: any;
   }
 
-  export interface ProxyWithPathDeleteRes {
+  export interface ProxyControllerWithPathDeleteRes {
     /**
      * @example 404
      */
@@ -625,10 +1167,10 @@ export namespace Proxy {
      * @example Agent 不存在或容器未运行
      */
     message: string;
-    data: any | null;
+    data: null | null;
   }
 
-  export interface ProxyWithPathDeleteParams {
+  export interface ProxyControllerWithPathDeleteParams {
     /**
      * @description Agent 的唯一标识符 (UUID)
      */
@@ -639,7 +1181,7 @@ export namespace Proxy {
     path: any;
   }
 
-  export interface ProxyWithPathOptionsRes {
+  export interface ProxyControllerWithPathOptionsRes {
     /**
      * @example 404
      */
@@ -648,10 +1190,10 @@ export namespace Proxy {
      * @example Agent 不存在或容器未运行
      */
     message: string;
-    data: any | null;
+    data: null | null;
   }
 
-  export interface ProxyWithPathOptionsParams {
+  export interface ProxyControllerWithPathOptionsParams {
     /**
      * @description Agent 的唯一标识符 (UUID)
      */
@@ -662,7 +1204,7 @@ export namespace Proxy {
     path: any;
   }
 
-  export interface ProxyWithPathHeadRes {
+  export interface ProxyControllerWithPathHeadRes {
     /**
      * @example 404
      */
@@ -671,10 +1213,10 @@ export namespace Proxy {
      * @example Agent 不存在或容器未运行
      */
     message: string;
-    data: any | null;
+    data: null | null;
   }
 
-  export interface ProxyWithPathHeadParams {
+  export interface ProxyControllerWithPathHeadParams {
     /**
      * @description Agent 的唯一标识符 (UUID)
      */
@@ -685,7 +1227,7 @@ export namespace Proxy {
     path: any;
   }
 
-  export interface ProxyWithPathPatchRes {
+  export interface ProxyControllerWithPathPatchRes {
     /**
      * @example 404
      */
@@ -694,10 +1236,10 @@ export namespace Proxy {
      * @example Agent 不存在或容器未运行
      */
     message: string;
-    data: any | null;
+    data: null | null;
   }
 
-  export interface ProxyWithPathPatchParams {
+  export interface ProxyControllerWithPathPatchParams {
     /**
      * @description Agent 的唯一标识符 (UUID)
      */
@@ -708,7 +1250,7 @@ export namespace Proxy {
     path: any;
   }
 
-  export interface ProxyRootGetRes {
+  export interface ProxyControllerRootGetRes {
     /**
      * @example 404
      */
@@ -717,17 +1259,17 @@ export namespace Proxy {
      * @example Agent 不存在或容器未运行
      */
     message: string;
-    data: any | null;
+    data: null | null;
   }
 
-  export interface ProxyRootGetParams {
+  export interface ProxyControllerRootGetParams {
     /**
      * @description Agent 的唯一标识符 (UUID)
      */
     agentId: string;
   }
 
-  export interface ProxyRootPutRes {
+  export interface ProxyControllerRootPutRes {
     /**
      * @example 404
      */
@@ -736,17 +1278,17 @@ export namespace Proxy {
      * @example Agent 不存在或容器未运行
      */
     message: string;
-    data: any | null;
+    data: null | null;
   }
 
-  export interface ProxyRootPutParams {
+  export interface ProxyControllerRootPutParams {
     /**
      * @description Agent 的唯一标识符 (UUID)
      */
     agentId: string;
   }
 
-  export interface ProxyRootPostRes {
+  export interface ProxyControllerRootPostRes {
     /**
      * @example 404
      */
@@ -755,17 +1297,17 @@ export namespace Proxy {
      * @example Agent 不存在或容器未运行
      */
     message: string;
-    data: any | null;
+    data: null | null;
   }
 
-  export interface ProxyRootPostParams {
+  export interface ProxyControllerRootPostParams {
     /**
      * @description Agent 的唯一标识符 (UUID)
      */
     agentId: string;
   }
 
-  export interface ProxyRootDeleteRes {
+  export interface ProxyControllerRootDeleteRes {
     /**
      * @example 404
      */
@@ -774,17 +1316,17 @@ export namespace Proxy {
      * @example Agent 不存在或容器未运行
      */
     message: string;
-    data: any | null;
+    data: null | null;
   }
 
-  export interface ProxyRootDeleteParams {
+  export interface ProxyControllerRootDeleteParams {
     /**
      * @description Agent 的唯一标识符 (UUID)
      */
     agentId: string;
   }
 
-  export interface ProxyRootOptionsRes {
+  export interface ProxyControllerRootOptionsRes {
     /**
      * @example 404
      */
@@ -793,17 +1335,17 @@ export namespace Proxy {
      * @example Agent 不存在或容器未运行
      */
     message: string;
-    data: any | null;
+    data: null | null;
   }
 
-  export interface ProxyRootOptionsParams {
+  export interface ProxyControllerRootOptionsParams {
     /**
      * @description Agent 的唯一标识符 (UUID)
      */
     agentId: string;
   }
 
-  export interface ProxyRootHeadRes {
+  export interface ProxyControllerRootHeadRes {
     /**
      * @example 404
      */
@@ -812,17 +1354,17 @@ export namespace Proxy {
      * @example Agent 不存在或容器未运行
      */
     message: string;
-    data: any | null;
+    data: null | null;
   }
 
-  export interface ProxyRootHeadParams {
+  export interface ProxyControllerRootHeadParams {
     /**
      * @description Agent 的唯一标识符 (UUID)
      */
     agentId: string;
   }
 
-  export interface ProxyRootPatchRes {
+  export interface ProxyControllerRootPatchRes {
     /**
      * @example 404
      */
@@ -831,57 +1373,113 @@ export namespace Proxy {
      * @example Agent 不存在或容器未运行
      */
     message: string;
-    data: any | null;
+    data: null | null;
   }
 
-  export interface ProxyRootPatchParams {
+  export interface ProxyControllerRootPatchParams {
     /**
      * @description Agent 的唯一标识符 (UUID)
      */
     agentId: string;
   }
 
-  export type RProxyRootGet = Promise<
-    [any, Proxy.ProxyRootGetRes["data"], Proxy.ProxyRootGetRes]
+  export type RProxyControllerRootGet = Promise<
+    [
+      any,
+      AgentProxy.ProxyControllerRootGetRes["data"],
+      AgentProxy.ProxyControllerRootGetRes
+    ]
   >;
-  export type RProxyRootPut = Promise<
-    [any, Proxy.ProxyRootPutRes["data"], Proxy.ProxyRootPutRes]
+  export type RProxyControllerRootPut = Promise<
+    [
+      any,
+      AgentProxy.ProxyControllerRootPutRes["data"],
+      AgentProxy.ProxyControllerRootPutRes
+    ]
   >;
-  export type RProxyRootPost = Promise<
-    [any, Proxy.ProxyRootPostRes["data"], Proxy.ProxyRootPostRes]
+  export type RProxyControllerRootPost = Promise<
+    [
+      any,
+      AgentProxy.ProxyControllerRootPostRes["data"],
+      AgentProxy.ProxyControllerRootPostRes
+    ]
   >;
-  export type RProxyRootHead = Promise<
-    [any, Proxy.ProxyRootHeadRes["data"], Proxy.ProxyRootHeadRes]
+  export type RProxyControllerRootHead = Promise<
+    [
+      any,
+      AgentProxy.ProxyControllerRootHeadRes["data"],
+      AgentProxy.ProxyControllerRootHeadRes
+    ]
   >;
-  export type RProxyRootPatch = Promise<
-    [any, Proxy.ProxyRootPatchRes["data"], Proxy.ProxyRootPatchRes]
+  export type RProxyControllerRootPatch = Promise<
+    [
+      any,
+      AgentProxy.ProxyControllerRootPatchRes["data"],
+      AgentProxy.ProxyControllerRootPatchRes
+    ]
   >;
-  export type RProxyRootDelete = Promise<
-    [any, Proxy.ProxyRootDeleteRes["data"], Proxy.ProxyRootDeleteRes]
+  export type RProxyControllerRootDelete = Promise<
+    [
+      any,
+      AgentProxy.ProxyControllerRootDeleteRes["data"],
+      AgentProxy.ProxyControllerRootDeleteRes
+    ]
   >;
-  export type RProxyWithPathGet = Promise<
-    [any, Proxy.ProxyWithPathGetRes["data"], Proxy.ProxyWithPathGetRes]
+  export type RProxyControllerWithPathGet = Promise<
+    [
+      any,
+      AgentProxy.ProxyControllerWithPathGetRes["data"],
+      AgentProxy.ProxyControllerWithPathGetRes
+    ]
   >;
-  export type RProxyWithPathPut = Promise<
-    [any, Proxy.ProxyWithPathPutRes["data"], Proxy.ProxyWithPathPutRes]
+  export type RProxyControllerWithPathPut = Promise<
+    [
+      any,
+      AgentProxy.ProxyControllerWithPathPutRes["data"],
+      AgentProxy.ProxyControllerWithPathPutRes
+    ]
   >;
-  export type RProxyRootOptions = Promise<
-    [any, Proxy.ProxyRootOptionsRes["data"], Proxy.ProxyRootOptionsRes]
+  export type RProxyControllerRootOptions = Promise<
+    [
+      any,
+      AgentProxy.ProxyControllerRootOptionsRes["data"],
+      AgentProxy.ProxyControllerRootOptionsRes
+    ]
   >;
-  export type RProxyWithPathPost = Promise<
-    [any, Proxy.ProxyWithPathPostRes["data"], Proxy.ProxyWithPathPostRes]
+  export type RProxyControllerWithPathPost = Promise<
+    [
+      any,
+      AgentProxy.ProxyControllerWithPathPostRes["data"],
+      AgentProxy.ProxyControllerWithPathPostRes
+    ]
   >;
-  export type RProxyWithPathHead = Promise<
-    [any, Proxy.ProxyWithPathHeadRes["data"], Proxy.ProxyWithPathHeadRes]
+  export type RProxyControllerWithPathHead = Promise<
+    [
+      any,
+      AgentProxy.ProxyControllerWithPathHeadRes["data"],
+      AgentProxy.ProxyControllerWithPathHeadRes
+    ]
   >;
-  export type RProxyWithPathPatch = Promise<
-    [any, Proxy.ProxyWithPathPatchRes["data"], Proxy.ProxyWithPathPatchRes]
+  export type RProxyControllerWithPathPatch = Promise<
+    [
+      any,
+      AgentProxy.ProxyControllerWithPathPatchRes["data"],
+      AgentProxy.ProxyControllerWithPathPatchRes
+    ]
   >;
-  export type RProxyWithPathDelete = Promise<
-    [any, Proxy.ProxyWithPathDeleteRes["data"], Proxy.ProxyWithPathDeleteRes]
+  export type RProxyControllerWithPathDelete = Promise<
+    [
+      any,
+      AgentProxy.ProxyControllerWithPathDeleteRes["data"],
+      AgentProxy.ProxyControllerWithPathDeleteRes
+    ]
   >;
-  export type RProxyWithPathOptions = Promise<
-    [any, Proxy.ProxyWithPathOptionsRes["data"], Proxy.ProxyWithPathOptionsRes]
+  export type RProxyControllerWithPathOptions = Promise<
+    [
+      any,
+      AgentProxy.ProxyControllerWithPathOptionsRes["data"],
+      AgentProxy.ProxyControllerWithPathOptionsRes
+    ]
   >;
 }
 
@@ -895,16 +1493,7 @@ export namespace Heartbeat {
      * @example success
      */
     message: string;
-    data: {
-      /**
-       * @description 是否有待执行任务
-       */
-      hasTask?: boolean;
-      /**
-       * @description 任务详情（如果有任务）
-       */
-      task?: object | null;
-    };
+    data: __common__.HeartbeatResponseDto;
   }
 
   export interface HeartbeatUpdateParams {}
@@ -980,7 +1569,7 @@ export namespace Monitoring {
      * @example success
      */
     message: string;
-    data: __common__.MetricsResponseDto;
+    data: __common__.SystemMetricsResponseDto;
   }
 
   export interface MonitoringMetricsParams {}
@@ -1004,21 +1593,7 @@ export namespace Audit {
      * @example success
      */
     message: string;
-    data: {
-      items?: Array<__common__.ItemsT>;
-      /**
-       * @example 100
-       */
-      total?: number;
-      /**
-       * @example 1
-       */
-      page?: number;
-      /**
-       * @example 20
-       */
-      pageSize?: number;
-    };
+    data: __common__.PaginatedOperationLogEntity;
   }
 
   export interface AuditListOperationsParams {
@@ -1057,17 +1632,7 @@ export namespace Audit {
      * @example success
      */
     message: string;
-    data: {
-      /**
-* @example id,userId,operationType,operationResult,createdAt
-...
-*/
-      csv?: string;
-      /**
-       * @example operation-logs.csv
-       */
-      filename?: string;
-    };
+    data: __common__.OperationLogsExportDto;
   }
 
   export interface AuditExportOperationsParams {
@@ -1106,21 +1671,7 @@ export namespace Audit {
      * @example success
      */
     message: string;
-    data: {
-      items?: Array<__common__.ItemsT1>;
-      /**
-       * @example 100
-       */
-      total?: number;
-      /**
-       * @example 1
-       */
-      page?: number;
-      /**
-       * @example 20
-       */
-      pageSize?: number;
-    };
+    data: __common__.PaginatedHealthCheckLogEntity;
   }
 
   export interface AuditListHealthChecksParams {
@@ -1161,6 +1712,182 @@ export namespace Audit {
       any,
       Audit.AuditListHealthChecksRes["data"],
       Audit.AuditListHealthChecksRes
+    ]
+  >;
+}
+
+export namespace FileUpload {
+  export interface FileUploadControllerRes {
+    /**
+     * @example 200
+     */
+    code: number;
+    /**
+     * @example success
+     */
+    message: string;
+    data: __common__.UploadFileResponseDto;
+  }
+
+  export interface FileUploadControllerParams {
+    /**
+     * @description 容器的唯一标识符 (UUID)
+     */
+    id: string;
+  }
+
+  export interface FileUploadControllerBody {
+    /**
+     * @description 要上传的文件
+     */
+    file: File;
+    /**
+     * @example uploads/documents
+     * @description 目标子目录（相对于 /workspace），可选
+     */
+    targetDir?: string;
+  }
+
+  export interface FileUploadControllerInitMultipartRes {
+    /**
+     * @example 200
+     */
+    code: number;
+    /**
+     * @example success
+     */
+    message: string;
+    data: __common__.InitUploadResponseDto;
+  }
+
+  export interface FileUploadControllerInitMultipartParams {
+    /**
+     * @description 容器的唯一标识符 (UUID)
+     */
+    id: string;
+  }
+
+  /**
+   * @description 分块上传初始化参数
+   */
+  export interface FileUploadControllerInitMultipartBody
+    extends __common__.InitMultipartUploadDto {}
+
+  export interface FileUploadControllerChunkRes {
+    /**
+     * @example 200
+     */
+    code: number;
+    /**
+     * @example success
+     */
+    message: string;
+    data: __common__.UploadChunkResponseDto;
+  }
+
+  export interface FileUploadControllerChunkParams {
+    /**
+     * @description 容器的唯一标识符 (UUID)
+     */
+    id: string;
+    /**
+     * @description 上传会话 ID
+     */
+    uploadId: string;
+  }
+
+  export interface FileUploadControllerChunkBody {
+    /**
+     * @description 分块数据
+     */
+    chunk: File;
+    /**
+     * @description 分块索引（从 0 开始）
+     */
+    chunkIndex: number;
+  }
+
+  export interface FileUploadControllerCompleteRes {
+    /**
+     * @example 200
+     */
+    code: number;
+    /**
+     * @example success
+     */
+    message: string;
+    data: __common__.CompleteUploadResponseDto;
+  }
+
+  export interface FileUploadControllerCompleteParams {
+    /**
+     * @description 容器的唯一标识符 (UUID)
+     */
+    id: string;
+    /**
+     * @description 上传会话 ID
+     */
+    uploadId: string;
+  }
+
+  export interface FileUploadControllerDownloadRes {
+    /**
+     * @example 400
+     */
+    code: number;
+    /**
+     * @example 请求参数错误或路径非法
+     */
+    message: string;
+    data: null | null;
+  }
+
+  export interface FileUploadControllerDownloadParams {
+    /**
+     * @description 容器的唯一标识符 (UUID)
+     */
+    id: string;
+    /**
+     * @description 要下载的文件路径，必须以 /workspace 开头
+     */
+    filePath: string;
+  }
+
+  export type FileUploadControllerParams1 = FileUploadControllerParams &
+    FileUploadControllerBody;
+
+  export type RFileUploadController = Promise<
+    [
+      any,
+      FileUpload.FileUploadControllerRes["data"],
+      FileUpload.FileUploadControllerRes
+    ]
+  >;
+  export type FileUploadControllerChunkParams1 =
+    FileUploadControllerChunkParams & FileUploadControllerChunkBody;
+
+  export type RFileUploadControllerChunk = Promise<
+    [
+      any,
+      FileUpload.FileUploadControllerChunkRes["data"],
+      FileUpload.FileUploadControllerChunkRes
+    ]
+  >;
+  export type RFileUploadControllerComplete = Promise<
+    [
+      any,
+      FileUpload.FileUploadControllerCompleteRes["data"],
+      FileUpload.FileUploadControllerCompleteRes
+    ]
+  >;
+  export type FileUploadControllerInitMultipartParams1 =
+    FileUploadControllerInitMultipartParams & __common__.InitMultipartUploadDto;
+
+  export type RFileUploadControllerInitMultipart = Promise<
+    [
+      any,
+      FileUpload.FileUploadControllerInitMultipartRes["data"],
+      FileUpload.FileUploadControllerInitMultipartRes
     ]
   >;
 }

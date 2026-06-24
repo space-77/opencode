@@ -1,8 +1,9 @@
 export { app } from "./app";
 export { logs } from "./logs";
-export { proxy } from "./proxy";
 export { audit } from "./audit";
 export { agents } from "./agents";
 export { heartbeat } from "./heartbeat";
 export { containers } from "./containers";
+export { agentProxy } from "./agentProxy";
 export { monitoring } from "./monitoring";
+export { fileUpload } from "./fileUpload";

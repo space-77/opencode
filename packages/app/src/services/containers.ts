@@ -55,5 +55,33 @@ export default class Containers extends ApiClient {
     const config: DocReqConfig = { url: "/containers", body, method: "post" };
     return this.request<types.RContainersCreate>(config);
   }
+
+  /**
+   * @summary 创建工作区文件夹
+   * @description 在容器 /workspace 目录下创建子文件夹；未指定 folderName 时使用 UUID 命名
+   */
+  containersControllerCreateWorkspaceFolder(
+    params: types.ContainersControllerCreateWorkspaceFolderParams1
+  ) {
+    const { id, ...body } = params;
+    const url = `/containers/${id}/workspace/folders`;
+    const config: DocReqConfig = { url, body, method: "post" };
+    return this.request<types.RContainersControllerCreateWorkspaceFolder>(
+      config
+    );
+  }
+
+  /**
+   * @param { String } id 容器的唯一标识符 (UUID)
+   * @summary 获取可用工作区
+   * @description 返回一个未使用的工作区目录（目录为空且无关联 session）；若无空闲工作区则自动新建
+   */
+  containersControllerGetAvailableWorkspace(id: string) {
+    const url = `/containers/${id}/workspace/available`;
+    const config: DocReqConfig = { url, method: "get" };
+    return this.request<types.RContainersControllerGetAvailableWorkspace>(
+      config
+    );
+  }
 }
 export const containers = new Containers();

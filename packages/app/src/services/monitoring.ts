@@ -17,7 +17,7 @@ import type { Monitoring as types } from "./types";
 export default class Monitoring extends ApiClient {
   /**
    * @summary 获取系统监控指标
-   * @description 返回系统的 CPU、内存、磁盘使用情况和容器统计信息
+   * @description 返回容器状态统计、用户数据占用和用户活跃情况
    */
   monitoringMetrics() {
     const config: DocReqConfig = { url: "/monitoring/metrics", method: "get" };
