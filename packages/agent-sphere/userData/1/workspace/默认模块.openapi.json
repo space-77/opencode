@@ -1,0 +1,1136 @@
+{
+  "openapi": "3.0.1",
+  "info": {
+    "title": "默认模块",
+    "description": "基于Golang + Gin + MySQL的大模型管理服务API文档",
+    "version": "1.0.0"
+  },
+  "tags": [],
+  "paths": {},
+  "components": {
+    "schemas": {
+      "model.AddModelsRequest": {
+        "description": "为应用添加一个或多个模型的请求参数",
+        "type": "object",
+        "required": [
+          "model_ids"
+        ],
+        "properties": {
+          "default_model_id": {
+            "description": "默认模型ID，可选，必须在model_ids中",
+            "type": "integer",
+            "example": 1
+          },
+          "model_ids": {
+            "description": "要添加的模型ID列表，必填，至少一个",
+            "type": "array",
+            "items": {
+              "type": "integer"
+            }
+          }
+        }
+      },
+      "model.Application": {
+        "description": "应用配置信息，用于管理不同的应用和其关联的模型",
+        "type": "object",
+        "properties": {
+          "app_key": {
+            "description": "应用密钥，唯一",
+            "type": "string",
+            "example": "app_xxx"
+          },
+          "created_at": {
+            "description": "创建时间",
+            "type": "string",
+            "example": "2023-01-01T00:00:00Z"
+          },
+          "description": {
+            "description": "应用描述",
+            "type": "string",
+            "example": "这是一个测试应用"
+          },
+          "id": {
+            "description": "应用ID",
+            "type": "integer",
+            "example": 1
+          },
+          "is_enabled": {
+            "description": "是否启用",
+            "type": "boolean",
+            "example": true
+          },
+          "models": {
+            "description": "关联",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/model.ApplicationModel"
+            }
+          },
+          "name": {
+            "description": "应用名称，唯一",
+            "type": "string",
+            "example": "我的应用"
+          },
+          "updated_at": {
+            "description": "更新时间",
+            "type": "string",
+            "example": "2023-01-01T00:00:00Z"
+          }
+        }
+      },
+      "model.ApplicationConfig": {
+        "description": "应用的详细配置信息，包含关联模型列表和默认模型配置",
+        "type": "object",
+        "properties": {
+          "app_key": {
+            "description": "应用密钥",
+            "type": "string",
+            "example": "app_1234567890abcdef"
+          },
+          "default_model": {
+            "description": "默认模型配置",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/model.ApplicationModelConfig"
+              }
+            ]
+          },
+          "models": {
+            "description": "关联的模型配置列表",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/model.ApplicationModelConfig"
+            }
+          }
+        }
+      },
+      "model.ApplicationModel": {
+        "type": "object",
+        "properties": {
+          "application": {
+            "description": "关联",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/model.Application"
+              }
+            ]
+          },
+          "application_id": {
+            "type": "integer"
+          },
+          "created_at": {
+            "type": "string"
+          },
+          "id": {
+            "type": "integer"
+          },
+          "is_default": {
+            "type": "boolean"
+          },
+          "model": {
+            "$ref": "#/components/schemas/model.Model"
+          },
+          "model_id": {
+            "type": "integer"
+          }
+        }
+      },
+      "model.ApplicationModelConfig": {
+        "description": "应用关联的模型配置信息，包含模型详细信息和默认状态",
+        "type": "object",
+        "properties": {
+          "id": {
+            "description": "模型配置ID",
+            "type": "integer",
+            "example": 1
+          },
+          "is_default": {
+            "description": "是否为默认模型",
+            "type": "boolean",
+            "example": true
+          },
+          "model_name": {
+            "description": "模型名称",
+            "type": "string",
+            "example": "gpt-4-turbo"
+          },
+          "vendor": {
+            "description": "模型厂商",
+            "type": "string",
+            "example": "OpenAI"
+          }
+        }
+      },
+      "model.ChatCompletionRequest": {
+        "description": "OpenAI兼容的聊天完成请求参数，支持多种参数控制和思考模式",
+        "type": "object",
+        "required": [
+          "api_key",
+          "messages"
+        ],
+        "properties": {
+          "api_key": {
+            "description": "应用API密钥，必填，用于认证",
+            "type": "string",
+            "example": "app_1234567890abcdef"
+          },
+          "enable_thinking": {
+            "description": "是否启用思考模式，true=模型思考过程会包含在响应中",
+            "type": "boolean",
+            "example": true
+          },
+          "frequency_penalty": {
+            "description": "频率惩罚，-2.0到2.0，惩罚重复内容",
+            "type": "number",
+            "example": 0
+          },
+          "logit_bias": {
+            "description": "对数偏置，调整特定词汇的生成概率",
+            "type": "object",
+            "additionalProperties": {
+              "type": "number",
+              "format": "float32"
+            },
+            "properties": {}
+          },
+          "max_tokens": {
+            "description": "最大令牌数，限制响应长度",
+            "type": "integer",
+            "example": 1000
+          },
+          "messages": {
+            "description": "消息列表，必填，至少一条消息",
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "$ref": "#/components/schemas/model.Message"
+            }
+          },
+          "model": {
+            "description": "模型名称，可选，不指定、空值、\"auto\"或\"default\"时使用应用默认模型",
+            "type": "string",
+            "example": "gpt-4-turbo"
+          },
+          "n": {
+            "description": "生成的选择数量，1-10，默认为1",
+            "type": "integer",
+            "example": 1
+          },
+          "presence_penalty": {
+            "description": "存在惩罚，-2.0到2.0，惩罚新话题",
+            "type": "number",
+            "example": 0
+          },
+          "stop": {
+            "description": "停止词列表，遇到这些词会停止生成",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "stream": {
+            "description": "是否流式输出，false=一次性返回完整响应，true=流式返回",
+            "type": "boolean",
+            "example": false
+          },
+          "temperature": {
+            "description": "温度参数，控制随机性，0.0-2.0，越高越随机",
+            "type": "number",
+            "example": 0.7
+          },
+          "top_p": {
+            "description": "Top-p采样参数，控制词汇选择范围，0.0-1.0",
+            "type": "number",
+            "example": 1
+          },
+          "user": {
+            "description": "用户标识，用于追踪和监控",
+            "type": "string",
+            "example": "user123"
+          }
+        }
+      },
+      "model.ChatCompletionResponse": {
+        "description": "OpenAI兼容的聊天完成响应格式，包含完整回复和使用统计",
+        "type": "object",
+        "properties": {
+          "choices": {
+            "description": "生成的回复选项列表",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/model.Choice"
+            }
+          },
+          "created": {
+            "description": "创建时间戳",
+            "type": "integer",
+            "example": 1640995200
+          },
+          "id": {
+            "description": "对话ID，唯一标识一次对话",
+            "type": "string",
+            "example": "chatcmpl-1234567890abcdef"
+          },
+          "model": {
+            "description": "使用的模型名称",
+            "type": "string",
+            "example": "gpt-4-turbo"
+          },
+          "object": {
+            "description": "对象类型，固定为chat.completion",
+            "type": "string",
+            "example": "chat.completion"
+          },
+          "usage": {
+            "description": "令牌使用统计",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/model.Usage"
+              }
+            ]
+          }
+        }
+      },
+      "model.ChatCompletionRequestWithoutAPIKey": {
+        "description": "用于路径参数接口的聊天完成请求参数，认证信息通过URL路径中的appKey传递",
+        "type": "object",
+        "required": [
+          "messages"
+        ],
+        "properties": {
+          "enable_thinking": {
+            "description": "是否启用思考模式，true=模型思考过程会包含在响应中",
+            "type": "boolean",
+            "example": true
+          },
+          "frequency_penalty": {
+            "description": "频率惩罚，-2.0到2.0，惩罚重复内容",
+            "type": "number",
+            "example": 0
+          },
+          "logit_bias": {
+            "description": "对数偏置，调整特定词汇的生成概率",
+            "type": "object",
+            "additionalProperties": {
+              "type": "number",
+              "format": "float32"
+            },
+            "properties": {}
+          },
+          "max_tokens": {
+            "description": "最大令牌数，限制响应长度",
+            "type": "integer",
+            "example": 1000
+          },
+          "messages": {
+            "description": "消息列表，必填，至少一条消息",
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "$ref": "#/components/schemas/model.Message"
+            }
+          },
+          "model": {
+            "description": "模型名称，可选，不指定、空值、\"auto\"或\"default\"时使用应用默认模型",
+            "type": "string",
+            "example": "gpt-4-turbo"
+          },
+          "n": {
+            "description": "生成的选择数量，1-10，默认为1",
+            "type": "integer",
+            "example": 1
+          },
+          "presence_penalty": {
+            "description": "存在惩罚，-2.0到2.0，惩罚新话题",
+            "type": "number",
+            "example": 0
+          },
+          "stop": {
+            "description": "停止词列表，遇到这些词会停止生成",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "stream": {
+            "description": "是否流式输出，false=一次性返回完整响应，true=流式返回",
+            "type": "boolean",
+            "example": false
+          },
+          "temperature": {
+            "description": "温度参数，控制随机性，0.0-2.0，越高越随机",
+            "type": "number",
+            "example": 0.7
+          },
+          "top_p": {
+            "description": "Top-p采样参数，控制词汇选择范围，0.0-1.0",
+            "type": "number",
+            "example": 1
+          },
+          "user": {
+            "description": "用户标识，用于追踪和监控",
+            "type": "string",
+            "example": "user123"
+          }
+        }
+      },
+      "model.Choice": {
+        "description": "聊天完成的选择项，包含生成的消息和相关信息",
+        "type": "object",
+        "properties": {
+          "delta": {
+            "description": "流式响应的消息增量（仅流式响应时使用）",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/model.MessageDelta"
+              }
+            ]
+          },
+          "finish_reason": {
+            "description": "结束原因：stop=正常结束，length=达到长度限制",
+            "type": "string",
+            "example": "stop"
+          },
+          "index": {
+            "description": "选择项索引，通常为0",
+            "type": "integer",
+            "example": 0
+          },
+          "message": {
+            "description": "生成的消息内容",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/model.Message"
+              }
+            ]
+          }
+        }
+      },
+      "model.CreateApplicationRequest": {
+        "description": "创建新应用的请求参数",
+        "type": "object",
+        "required": [
+          "name"
+        ],
+        "properties": {
+          "app_key": {
+            "description": "应用密钥，可选，如果不提供则自动生成格式为'app_'开头的唯一标识。如果提供自定义值，系统会验证其唯一性",
+            "type": "string",
+            "example": "app_custom_key"
+          },
+          "default_model_id": {
+            "description": "默认模型ID，可选，必须是model_ids中的一个。如果提供了model_ids但没有指定默认模型，则第一个模型将作为默认模型",
+            "type": "integer"
+          },
+          "description": {
+            "description": "应用描述，可选",
+            "type": "string",
+            "example": "这是一个测试应用"
+          },
+          "model_ids": {
+            "description": "关联的模型ID列表，可选，创建应用时可以同时关联多个模型",
+            "type": "array",
+            "items": {
+              "type": "integer"
+            }
+          },
+          "name": {
+            "description": "应用名称，必填，唯一",
+            "type": "string",
+            "example": "我的应用"
+          }
+        }
+      },
+      "model.CreateModelRequest": {
+        "description": "创建新模型的请求参数",
+        "type": "object",
+        "required": [
+          "base_url",
+          "model_name",
+          "model_type",
+          "vendor"
+        ],
+        "properties": {
+          "api_key": {
+            "description": "API密钥",
+            "type": "string",
+            "example": "sk-xxx"
+          },
+          "base_url": {
+            "description": "API基础URL，必填",
+            "type": "string",
+            "example": "https://api.openai.com"
+          },
+          "context_size": {
+            "description": "上下文大小（tokens）",
+            "type": "integer",
+            "minimum": 0,
+            "example": 128000
+          },
+          "function_call": {
+            "description": "工具调用支持：1支持，0不支持，可选",
+            "type": "string",
+            "enum": [
+              "1",
+              "0"
+            ],
+            "example": "1"
+          },
+          "is_openai": {
+            "description": "是否兼容OpenAI API",
+            "type": "boolean",
+            "example": true
+          },
+          "model_name": {
+            "description": "模型名称，必填",
+            "type": "string",
+            "example": "gpt-4-turbo"
+          },
+          "model_type": {
+            "description": "模型类型，必填",
+            "type": "string",
+            "enum": [
+              "chat",
+              "embedding",
+              "rerank",
+              "images2text",
+              "tts"
+            ],
+            "example": "chat"
+          },
+          "nickname": {
+            "description": "模型昵称",
+            "type": "string",
+            "example": "GPT-4 Turbo"
+          },
+          "vendor": {
+            "description": "模型厂商，必填",
+            "type": "string",
+            "example": "OpenAI"
+          }
+        }
+      },
+      "model.CompletionTokensDetails": {
+        "description": "完成令牌的详细分解信息，包含推理令牌数量",
+        "type": "object",
+        "properties": {
+          "reasoning_tokens": {
+            "description": "推理过程使用的令牌数量",
+            "type": "integer",
+            "example": 20
+          }
+        }
+      },
+      "model.DatabaseInfo": {
+        "description": "数据库连接状态和统计信息",
+        "type": "object",
+        "properties": {
+          "stats": {
+            "description": "数据库统计信息，包含连接数、查询数等",
+            "type": "object",
+            "additionalProperties": true,
+            "properties": {}
+          },
+          "status": {
+            "description": "数据库状态：connected=已连接，disconnected=未连接，error=连接异常",
+            "type": "string",
+            "example": "connected"
+          }
+        }
+      },
+      "model.ErrorDetail": {
+        "description": "错误的详细信息，包含错误消息、类型和代码",
+        "type": "object",
+        "properties": {
+          "code": {
+            "description": "错误代码（可选）",
+            "type": "string",
+            "example": "invalid_api_key"
+          },
+          "message": {
+            "description": "错误消息描述",
+            "type": "string",
+            "example": "API密钥无效"
+          },
+          "type": {
+            "description": "错误类型",
+            "type": "string",
+            "example": "invalid_request_error"
+          }
+        }
+      },
+      "model.ErrorResponse": {
+        "description": "OpenAI兼容的错误响应格式，包含错误详情",
+        "type": "object",
+        "properties": {
+          "error": {
+            "description": "错误详情",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/model.ErrorDetail"
+              }
+            ]
+          }
+        }
+      },
+      "model.HealthResponse": {
+        "description": "服务健康状态检查的响应信息",
+        "type": "object",
+        "properties": {
+          "database": {
+            "description": "数据库连接状态：connected=已连接，disconnected=未连接，error=连接异常",
+            "type": "string",
+            "example": "connected"
+          },
+          "status": {
+            "description": "服务状态：ok=正常，error=异常",
+            "type": "string",
+            "example": "ok"
+          },
+          "timestamp": {
+            "description": "检查时间戳，RFC3339格式",
+            "type": "string",
+            "example": "2023-01-01T12:00:00Z"
+          }
+        }
+      },
+      "model.ImportResult": {
+        "description": "批量导入操作的执行结果统计",
+        "type": "object",
+        "properties": {
+          "errors": {
+            "description": "错误信息列表，仅在失败时提供",
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "example": [
+              "[\"第3行：模型名称不能为空\"",
+              "\"第5行：API密钥格式错误\"]"
+            ]
+          },
+          "failed": {
+            "description": "失败导入数量",
+            "type": "integer",
+            "example": 2
+          },
+          "success": {
+            "description": "成功导入数量",
+            "type": "integer",
+            "example": 8
+          },
+          "total": {
+            "description": "总记录数",
+            "type": "integer",
+            "example": 10
+          }
+        }
+      },
+      "model.Message": {
+        "description": "聊天消息结构，支持不同角色和思考模式",
+        "type": "object",
+        "required": [
+          "content",
+          "role"
+        ],
+        "properties": {
+          "content": {
+            "description": "消息内容，必填，不能为空",
+            "type": "string",
+            "minLength": 1,
+            "example": "你好，请介绍一下你自己"
+          },
+          "reasoning_content": {
+            "description": "模型思考过程，某些模型使用此字段名替代thinking，用于展示推理链",
+            "type": "string",
+            "example": "这个问题的答案是..."
+          },
+          "role": {
+            "description": "消息角色：system=系统指令，user=用户消息，assistant=助手回复",
+            "type": "string",
+            "enum": [
+              "system",
+              "user",
+              "assistant"
+            ],
+            "example": "user"
+          },
+          "thinking": {
+            "description": "模型思考过程，仅assistant角色且启用思考模式时出现，展示内部推理过程",
+            "type": "string",
+            "example": "让我思考一下如何回答这个问题..."
+          }
+        }
+      },
+      "model.MessageDelta": {
+        "description": "流式响应中的消息增量，支持思考模式和实时内容更新",
+        "type": "object",
+        "properties": {
+          "content": {
+            "description": "消息内容增量，逐步累积形成完整响应",
+            "type": "string",
+            "example": "你好！我是AI助手..."
+          },
+          "reasoning": {
+            "description": "模型思考过程，流式数据，某些模型使用此字段名",
+            "type": "string",
+            "example": "好的，让我来分析一下..."
+          },
+          "reasoning_content": {
+            "description": "模型思考过程，流式数据，部分模型使用此字段名替代thinking",
+            "type": "string",
+            "example": "从用户的需求来看..."
+          },
+          "role": {
+            "description": "消息角色增量，通常只在第一条流式消息中出现",
+            "type": "string",
+            "example": "assistant"
+          },
+          "thinking": {
+            "description": "模型思考过程增量，仅在思考模式下出现，实时展示推理过程",
+            "type": "string",
+            "example": "首先，我需要理解用户的问题..."
+          }
+        }
+      },
+      "model.Model": {
+        "description": "大模型配置信息，包含模型的基本信息、API配置和状态",
+        "type": "object",
+        "properties": {
+          "api_key": {
+            "description": "API密钥",
+            "type": "string",
+            "example": "sk-xxx"
+          },
+          "applications": {
+            "description": "关联应用",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/model.ApplicationModel"
+            }
+          },
+          "base_url": {
+            "description": "模型基础路径",
+            "type": "string",
+            "example": "https://api.openai.com"
+          },
+          "check_results": {
+            "description": "关联",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/model.ModelCheckResult"
+            }
+          },
+          "context_size": {
+            "description": "上下文大小（tokens）",
+            "type": "integer",
+            "example": 128000
+          },
+          "created_at": {
+            "description": "创建时间",
+            "type": "string",
+            "example": "2023-01-01T00:00:00Z"
+          },
+          "function_call": {
+            "description": "工具调用支持：1支持，0不支持",
+            "type": "string",
+            "example": "1"
+          },
+          "id": {
+            "description": "模型ID",
+            "type": "integer",
+            "example": 1
+          },
+          "is_available": {
+            "description": "是否可用",
+            "type": "boolean",
+            "example": true
+          },
+          "is_enabled": {
+            "description": "禁用启用状态",
+            "type": "boolean",
+            "example": true
+          },
+          "is_openai": {
+            "description": "是否符合OpenAI规范",
+            "type": "boolean",
+            "example": true
+          },
+          "model_name": {
+            "description": "模型名称",
+            "type": "string",
+            "example": "gpt-4-turbo"
+          },
+          "model_type": {
+            "description": "模型类型",
+            "type": "string",
+            "example": "chat"
+          },
+          "nickname": {
+            "description": "模型昵称",
+            "type": "string",
+            "example": "GPT-4 Turbo"
+          },
+          "updated_at": {
+            "description": "更新时间",
+            "type": "string",
+            "example": "2023-01-01T00:00:00Z"
+          },
+          "vendor": {
+            "description": "模型厂商",
+            "type": "string",
+            "example": "OpenAI"
+          }
+        }
+      },
+      "model.ModelCheckResult": {
+        "type": "object",
+        "properties": {
+          "checked_at": {
+            "type": "string"
+          },
+          "created_at": {
+            "type": "string"
+          },
+          "error_msg": {
+            "type": "string"
+          },
+          "id": {
+            "type": "integer"
+          },
+          "is_available": {
+            "type": "boolean"
+          },
+          "model": {
+            "description": "关联",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/model.Model"
+              }
+            ]
+          },
+          "model_id": {
+            "type": "integer"
+          },
+          "response_time": {
+            "description": "响应时间，毫秒",
+            "type": "integer"
+          }
+        }
+      },
+      "model.ModelInfo": {
+        "description": "模型的基本信息，用于模型列表接口返回",
+        "type": "object",
+        "properties": {
+          "created": {
+            "description": "创建时间戳",
+            "type": "integer",
+            "example": 1640995200
+          },
+          "id": {
+            "description": "模型ID",
+            "type": "string",
+            "example": "gpt-4-turbo"
+          },
+          "object": {
+            "description": "对象类型，固定为model",
+            "type": "string",
+            "example": "model"
+          },
+          "owned_by": {
+            "description": "模型所有者",
+            "type": "string",
+            "example": "openai"
+          }
+        }
+      },
+      "model.ModelsInfo": {
+        "description": "模型配置的数量统计信息",
+        "type": "object",
+        "properties": {
+          "available": {
+            "description": "可用模型数量（API连接正常）",
+            "type": "integer",
+            "example": 20
+          },
+          "enabled": {
+            "description": "启用状态模型数量",
+            "type": "integer",
+            "example": 18
+          },
+          "total": {
+            "description": "模型总数量（包括已删除的）",
+            "type": "integer",
+            "example": 25
+          }
+        }
+      },
+      "model.ModelsResponse": {
+        "description": "模型列表的响应格式，包含可用的模型信息",
+        "type": "object",
+        "properties": {
+          "data": {
+            "description": "模型信息列表",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/model.ModelInfo"
+            }
+          },
+          "object": {
+            "description": "对象类型，固定为list",
+            "type": "string",
+            "example": "list"
+          }
+        }
+      },
+      "model.PageResponse": {
+        "description": "分页数据响应格式，用于列表类接口的返回数据",
+        "type": "object",
+        "properties": {
+          "list": {
+            "description": "当前页的数据列表，根据具体接口返回不同类型的对象数组"
+          },
+          "page": {
+            "description": "当前页码，从1开始",
+            "type": "integer",
+            "example": 1
+          },
+          "page_size": {
+            "description": "每页大小，默认20，最大500",
+            "type": "integer",
+            "example": 20
+          },
+          "total": {
+            "description": "总记录数（不受分页影响的总数）",
+            "type": "integer",
+            "example": 100
+          }
+        }
+      },
+      "model.Response": {
+        "description": "API统一响应格式，所有接口都使用此结构返回数据",
+        "type": "object",
+        "properties": {
+          "code": {
+            "description": "响应状态码：200=成功，400=请求错误，401=未授权，404=不存在，500=服务器错误",
+            "type": "integer",
+            "example": 200
+          },
+          "data": {
+            "description": "响应数据，成功时包含具体的业务数据，失败时为null"
+          },
+          "message": {
+            "description": "响应消息，成功时返回\"成功\"，失败时返回具体的错误信息",
+            "type": "string",
+            "example": "操作成功"
+          }
+        }
+      },
+      "model.SetDefaultModelRequest": {
+        "description": "为应用设置默认模型的请求参数",
+        "type": "object",
+        "required": [
+          "model_id"
+        ],
+        "properties": {
+          "model_id": {
+            "description": "要设置为默认的模型ID，必填，必须已关联到该应用",
+            "type": "integer",
+            "example": 1
+          }
+        }
+      },
+      "model.StatusResponse": {
+        "type": "object",
+        "properties": {
+          "database": {
+            "$ref": "#/components/schemas/model.DatabaseInfo"
+          },
+          "models": {
+            "$ref": "#/components/schemas/model.ModelsInfo"
+          },
+          "system": {
+            "$ref": "#/components/schemas/model.SystemInfo"
+          }
+        }
+      },
+      "model.SystemInfo": {
+        "description": "系统运行状态和版本信息",
+        "type": "object",
+        "properties": {
+          "go_version": {
+            "description": "Go运行时版本",
+            "type": "string",
+            "example": "go1.19.0"
+          },
+          "uptime": {
+            "description": "系统运行时间",
+            "type": "string",
+            "example": "72h3m"
+          },
+          "version": {
+            "description": "应用版本号",
+            "type": "string",
+            "example": "1.0.0"
+          }
+        }
+      },
+      "model.UpdateApplicationRequest": {
+        "description": "更新应用的请求参数，所有字段都是可选的",
+        "type": "object",
+        "properties": {
+          "app_key": {
+            "description": "应用密钥，可选，如果提供会验证唯一性，确保不与其他应用冲突",
+            "type": "string",
+            "example": "new_app_key"
+          },
+          "default_model_id": {
+            "description": "默认模型ID，可选，如果同时提供了model_ids则必须在其中，否则必须在现有关联模型中",
+            "type": "integer"
+          },
+          "description": {
+            "description": "应用描述，可选",
+            "type": "string",
+            "example": "更新后的应用描述"
+          },
+          "model_ids": {
+            "description": "重新设置关联的模型ID列表，可选，如果提供则会替换现有的模型关联",
+            "type": "array",
+            "items": {
+              "type": "integer"
+            }
+          },
+          "name": {
+            "description": "应用名称，可选，如果提供会验证唯一性",
+            "type": "string",
+            "example": "更新后的应用名称"
+          }
+        }
+      },
+      "model.UpdateApplicationStatusRequest": {
+        "description": "更新应用启用状态的请求参数",
+        "type": "object",
+        "properties": {
+          "is_enabled": {
+            "description": "是否启用应用，true=启用，false=禁用",
+            "type": "boolean",
+            "example": true
+          }
+        }
+      },
+      "model.UpdateModelRequest": {
+        "description": "更新模型配置的请求参数，所有字段都是可选的，只更新提供的字段",
+        "type": "object",
+        "properties": {
+          "base_url": {
+            "description": "API基础URL，可选",
+            "type": "string",
+            "example": "https://api.openai.com"
+          },
+          "context_size": {
+            "description": "上下文大小（tokens），可选",
+            "type": "integer",
+            "minimum": 0,
+            "example": 128000
+          },
+          "function_call": {
+            "description": "工具调用支持：1支持，0不支持，可选",
+            "type": "string",
+            "enum": [
+              "1",
+              "0"
+            ],
+            "example": "1"
+          },
+          "is_openai": {
+            "description": "是否兼容OpenAI API，可选",
+            "type": "boolean",
+            "example": true
+          },
+          "model_name": {
+            "description": "模型名称，可选",
+            "type": "string",
+            "example": "gpt-4-turbo"
+          },
+          "model_type": {
+            "description": "模型类型，可选",
+            "type": "string",
+            "enum": [
+              "chat",
+              "embedding",
+              "rerank",
+              "images2text",
+              "tts"
+            ],
+            "example": "chat"
+          },
+          "nickname": {
+            "description": "模型昵称，可选",
+            "type": "string",
+            "example": "GPT-4 Turbo"
+          },
+          "vendor": {
+            "description": "模型厂商，可选",
+            "type": "string",
+            "example": "OpenAI"
+          }
+        }
+      },
+      "model.UpdateModelStatusRequest": {
+        "description": "更新模型启用状态的请求参数",
+        "type": "object",
+        "properties": {
+          "is_enabled": {
+            "description": "是否启用模型，true=启用，false=禁用",
+            "type": "boolean",
+            "example": true
+          }
+        }
+      },
+      "model.Usage": {
+        "type": "object",
+        "properties": {
+          "completion_tokens": {
+            "description": "生成回复的令牌数量",
+            "type": "integer",
+            "example": 100
+          },
+          "completion_tokens_details": {
+            "description": "完成令牌的详细信息",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/model.CompletionTokensDetails"
+              }
+            ]
+          },
+          "prompt_tokens": {
+            "description": "输入消息的令牌数量",
+            "type": "integer",
+            "example": 50
+          },
+          "total_tokens": {
+            "description": "总令牌数量",
+            "type": "integer",
+            "example": 150
+          }
+        }
+      }
+    },
+    "securitySchemes": {
+      "ApiKeyAuth": {
+        "description": "输入Bearer {token}格式的API密钥，用于管理接口认证",
+        "type": "apiKey",
+        "name": "Authorization",
+        "in": "header"
+      },
+      "AppKeyAuth": {
+        "description": "应用API密钥，用于聊天接口认证",
+        "type": "apiKey",
+        "name": "api_key",
+        "in": "query"
+      }
+    }
+  },
+  "servers": [],
+  "security": []
+}
