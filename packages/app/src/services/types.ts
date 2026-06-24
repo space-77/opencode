@@ -959,7 +959,7 @@ export namespace Containers {
     id: string
   }
 
-  export interface ContainersControllerCreateWorkspaceFolderRes {
+  export interface ContainersCreateWorkspaceFolderRes {
     /**
      * @example 200
      */
@@ -971,7 +971,7 @@ export namespace Containers {
     data: __common__.WorkspaceFolderResponseDto
   }
 
-  export interface ContainersControllerCreateWorkspaceFolderParams {
+  export interface ContainersCreateWorkspaceFolderParams {
     /**
      * @description 容器的唯一标识符 (UUID)
      */
@@ -981,9 +981,9 @@ export namespace Containers {
   /**
    * @description 可选的文件夹名称
    */
-  export interface ContainersControllerCreateWorkspaceFolderBody extends __common__.CreateWorkspaceFolderDto {}
+  export interface ContainersCreateWorkspaceFolderBody extends __common__.CreateWorkspaceFolderDto {}
 
-  export interface ContainersControllerGetAvailableWorkspaceRes {
+  export interface ContainersGetAvailableWorkspaceRes {
     /**
      * @example 200
      */
@@ -995,7 +995,7 @@ export namespace Containers {
     data: __common__.WorkspaceFolderResponseDto
   }
 
-  export interface ContainersControllerGetAvailableWorkspaceParams {
+  export interface ContainersGetAvailableWorkspaceParams {
     /**
      * @description 容器的唯一标识符 (UUID)
      */
@@ -1006,22 +1006,14 @@ export namespace Containers {
   export type RContainersStop = Promise<[any, Containers.ContainersStopRes["data"], Containers.ContainersStopRes]>
   export type RContainersStart = Promise<[any, Containers.ContainersStartRes["data"], Containers.ContainersStartRes]>
   export type RContainersCreate = Promise<[any, Containers.ContainersCreateRes["data"], Containers.ContainersCreateRes]>
-  export type ContainersControllerCreateWorkspaceFolderParams1 = ContainersControllerCreateWorkspaceFolderParams &
+  export type ContainersCreateWorkspaceFolderParams1 = ContainersCreateWorkspaceFolderParams &
     __common__.CreateWorkspaceFolderDto
 
-  export type RContainersControllerCreateWorkspaceFolder = Promise<
-    [
-      any,
-      Containers.ContainersControllerCreateWorkspaceFolderRes["data"],
-      Containers.ContainersControllerCreateWorkspaceFolderRes,
-    ]
+  export type RContainersCreateWorkspaceFolder = Promise<
+    [any, Containers.ContainersCreateWorkspaceFolderRes["data"], Containers.ContainersCreateWorkspaceFolderRes]
   >
-  export type RContainersControllerGetAvailableWorkspace = Promise<
-    [
-      any,
-      Containers.ContainersControllerGetAvailableWorkspaceRes["data"],
-      Containers.ContainersControllerGetAvailableWorkspaceRes,
-    ]
+  export type RContainersGetAvailableWorkspace = Promise<
+    [any, Containers.ContainersGetAvailableWorkspaceRes["data"], Containers.ContainersGetAvailableWorkspaceRes]
   >
 }
 
@@ -1069,7 +1061,7 @@ export namespace Agents {
 }
 
 export namespace AgentProxy {
-  export interface ProxyControllerWithPathGetRes {
+  export interface ProxyWithPathGetRes {
     /**
      * @example 404
      */
@@ -1081,7 +1073,7 @@ export namespace AgentProxy {
     data: null | null
   }
 
-  export interface ProxyControllerWithPathGetParams {
+  export interface ProxyWithPathGetParams {
     /**
      * @description Agent 的唯一标识符 (UUID)
      */
@@ -1092,7 +1084,7 @@ export namespace AgentProxy {
     path: any
   }
 
-  export interface ProxyControllerWithPathPutRes {
+  export interface ProxyWithPathPutRes {
     /**
      * @example 404
      */
@@ -1104,7 +1096,7 @@ export namespace AgentProxy {
     data: null | null
   }
 
-  export interface ProxyControllerWithPathPutParams {
+  export interface ProxyWithPathPutParams {
     /**
      * @description Agent 的唯一标识符 (UUID)
      */
@@ -1115,7 +1107,7 @@ export namespace AgentProxy {
     path: any
   }
 
-  export interface ProxyControllerWithPathPostRes {
+  export interface ProxyWithPathPostRes {
     /**
      * @example 404
      */
@@ -1127,7 +1119,7 @@ export namespace AgentProxy {
     data: null | null
   }
 
-  export interface ProxyControllerWithPathPostParams {
+  export interface ProxyWithPathPostParams {
     /**
      * @description Agent 的唯一标识符 (UUID)
      */
@@ -1138,7 +1130,7 @@ export namespace AgentProxy {
     path: any
   }
 
-  export interface ProxyControllerWithPathDeleteRes {
+  export interface ProxyWithPathDeleteRes {
     /**
      * @example 404
      */
@@ -1150,7 +1142,7 @@ export namespace AgentProxy {
     data: null | null
   }
 
-  export interface ProxyControllerWithPathDeleteParams {
+  export interface ProxyWithPathDeleteParams {
     /**
      * @description Agent 的唯一标识符 (UUID)
      */
@@ -1161,7 +1153,7 @@ export namespace AgentProxy {
     path: any
   }
 
-  export interface ProxyControllerWithPathOptionsRes {
+  export interface ProxyWithPathOptionsRes {
     /**
      * @example 404
      */
@@ -1173,7 +1165,7 @@ export namespace AgentProxy {
     data: null | null
   }
 
-  export interface ProxyControllerWithPathOptionsParams {
+  export interface ProxyWithPathOptionsParams {
     /**
      * @description Agent 的唯一标识符 (UUID)
      */
@@ -1184,7 +1176,7 @@ export namespace AgentProxy {
     path: any
   }
 
-  export interface ProxyControllerWithPathHeadRes {
+  export interface ProxyWithPathHeadRes {
     /**
      * @example 404
      */
@@ -1196,7 +1188,7 @@ export namespace AgentProxy {
     data: null | null
   }
 
-  export interface ProxyControllerWithPathHeadParams {
+  export interface ProxyWithPathHeadParams {
     /**
      * @description Agent 的唯一标识符 (UUID)
      */
@@ -1207,7 +1199,7 @@ export namespace AgentProxy {
     path: any
   }
 
-  export interface ProxyControllerWithPathPatchRes {
+  export interface ProxyWithPathPatchRes {
     /**
      * @example 404
      */
@@ -1219,7 +1211,7 @@ export namespace AgentProxy {
     data: null | null
   }
 
-  export interface ProxyControllerWithPathPatchParams {
+  export interface ProxyWithPathPatchParams {
     /**
      * @description Agent 的唯一标识符 (UUID)
      */
@@ -1230,7 +1222,7 @@ export namespace AgentProxy {
     path: any
   }
 
-  export interface ProxyControllerRootGetRes {
+  export interface ProxyRootGetRes {
     /**
      * @example 404
      */
@@ -1242,14 +1234,14 @@ export namespace AgentProxy {
     data: null | null
   }
 
-  export interface ProxyControllerRootGetParams {
+  export interface ProxyRootGetParams {
     /**
      * @description Agent 的唯一标识符 (UUID)
      */
     agentId: string
   }
 
-  export interface ProxyControllerRootPutRes {
+  export interface ProxyRootPutRes {
     /**
      * @example 404
      */
@@ -1261,14 +1253,14 @@ export namespace AgentProxy {
     data: null | null
   }
 
-  export interface ProxyControllerRootPutParams {
+  export interface ProxyRootPutParams {
     /**
      * @description Agent 的唯一标识符 (UUID)
      */
     agentId: string
   }
 
-  export interface ProxyControllerRootPostRes {
+  export interface ProxyRootPostRes {
     /**
      * @example 404
      */
@@ -1280,14 +1272,14 @@ export namespace AgentProxy {
     data: null | null
   }
 
-  export interface ProxyControllerRootPostParams {
+  export interface ProxyRootPostParams {
     /**
      * @description Agent 的唯一标识符 (UUID)
      */
     agentId: string
   }
 
-  export interface ProxyControllerRootDeleteRes {
+  export interface ProxyRootDeleteRes {
     /**
      * @example 404
      */
@@ -1299,14 +1291,14 @@ export namespace AgentProxy {
     data: null | null
   }
 
-  export interface ProxyControllerRootDeleteParams {
+  export interface ProxyRootDeleteParams {
     /**
      * @description Agent 的唯一标识符 (UUID)
      */
     agentId: string
   }
 
-  export interface ProxyControllerRootOptionsRes {
+  export interface ProxyRootOptionsRes {
     /**
      * @example 404
      */
@@ -1318,14 +1310,14 @@ export namespace AgentProxy {
     data: null | null
   }
 
-  export interface ProxyControllerRootOptionsParams {
+  export interface ProxyRootOptionsParams {
     /**
      * @description Agent 的唯一标识符 (UUID)
      */
     agentId: string
   }
 
-  export interface ProxyControllerRootHeadRes {
+  export interface ProxyRootHeadRes {
     /**
      * @example 404
      */
@@ -1337,14 +1329,14 @@ export namespace AgentProxy {
     data: null | null
   }
 
-  export interface ProxyControllerRootHeadParams {
+  export interface ProxyRootHeadParams {
     /**
      * @description Agent 的唯一标识符 (UUID)
      */
     agentId: string
   }
 
-  export interface ProxyControllerRootPatchRes {
+  export interface ProxyRootPatchRes {
     /**
      * @example 404
      */
@@ -1356,54 +1348,36 @@ export namespace AgentProxy {
     data: null | null
   }
 
-  export interface ProxyControllerRootPatchParams {
+  export interface ProxyRootPatchParams {
     /**
      * @description Agent 的唯一标识符 (UUID)
      */
     agentId: string
   }
 
-  export type RProxyControllerRootGet = Promise<
-    [any, AgentProxy.ProxyControllerRootGetRes["data"], AgentProxy.ProxyControllerRootGetRes]
+  export type RProxyRootGet = Promise<[any, AgentProxy.ProxyRootGetRes["data"], AgentProxy.ProxyRootGetRes]>
+  export type RProxyRootPut = Promise<[any, AgentProxy.ProxyRootPutRes["data"], AgentProxy.ProxyRootPutRes]>
+  export type RProxyRootPost = Promise<[any, AgentProxy.ProxyRootPostRes["data"], AgentProxy.ProxyRootPostRes]>
+  export type RProxyRootHead = Promise<[any, AgentProxy.ProxyRootHeadRes["data"], AgentProxy.ProxyRootHeadRes]>
+  export type RProxyRootPatch = Promise<[any, AgentProxy.ProxyRootPatchRes["data"], AgentProxy.ProxyRootPatchRes]>
+  export type RProxyRootDelete = Promise<[any, AgentProxy.ProxyRootDeleteRes["data"], AgentProxy.ProxyRootDeleteRes]>
+  export type RProxyWithPathGet = Promise<[any, AgentProxy.ProxyWithPathGetRes["data"], AgentProxy.ProxyWithPathGetRes]>
+  export type RProxyWithPathPut = Promise<[any, AgentProxy.ProxyWithPathPutRes["data"], AgentProxy.ProxyWithPathPutRes]>
+  export type RProxyRootOptions = Promise<[any, AgentProxy.ProxyRootOptionsRes["data"], AgentProxy.ProxyRootOptionsRes]>
+  export type RProxyWithPathPost = Promise<
+    [any, AgentProxy.ProxyWithPathPostRes["data"], AgentProxy.ProxyWithPathPostRes]
   >
-  export type RProxyControllerRootPut = Promise<
-    [any, AgentProxy.ProxyControllerRootPutRes["data"], AgentProxy.ProxyControllerRootPutRes]
+  export type RProxyWithPathHead = Promise<
+    [any, AgentProxy.ProxyWithPathHeadRes["data"], AgentProxy.ProxyWithPathHeadRes]
   >
-  export type RProxyControllerRootPost = Promise<
-    [any, AgentProxy.ProxyControllerRootPostRes["data"], AgentProxy.ProxyControllerRootPostRes]
+  export type RProxyWithPathPatch = Promise<
+    [any, AgentProxy.ProxyWithPathPatchRes["data"], AgentProxy.ProxyWithPathPatchRes]
   >
-  export type RProxyControllerRootHead = Promise<
-    [any, AgentProxy.ProxyControllerRootHeadRes["data"], AgentProxy.ProxyControllerRootHeadRes]
+  export type RProxyWithPathDelete = Promise<
+    [any, AgentProxy.ProxyWithPathDeleteRes["data"], AgentProxy.ProxyWithPathDeleteRes]
   >
-  export type RProxyControllerRootPatch = Promise<
-    [any, AgentProxy.ProxyControllerRootPatchRes["data"], AgentProxy.ProxyControllerRootPatchRes]
-  >
-  export type RProxyControllerRootDelete = Promise<
-    [any, AgentProxy.ProxyControllerRootDeleteRes["data"], AgentProxy.ProxyControllerRootDeleteRes]
-  >
-  export type RProxyControllerWithPathGet = Promise<
-    [any, AgentProxy.ProxyControllerWithPathGetRes["data"], AgentProxy.ProxyControllerWithPathGetRes]
-  >
-  export type RProxyControllerWithPathPut = Promise<
-    [any, AgentProxy.ProxyControllerWithPathPutRes["data"], AgentProxy.ProxyControllerWithPathPutRes]
-  >
-  export type RProxyControllerRootOptions = Promise<
-    [any, AgentProxy.ProxyControllerRootOptionsRes["data"], AgentProxy.ProxyControllerRootOptionsRes]
-  >
-  export type RProxyControllerWithPathPost = Promise<
-    [any, AgentProxy.ProxyControllerWithPathPostRes["data"], AgentProxy.ProxyControllerWithPathPostRes]
-  >
-  export type RProxyControllerWithPathHead = Promise<
-    [any, AgentProxy.ProxyControllerWithPathHeadRes["data"], AgentProxy.ProxyControllerWithPathHeadRes]
-  >
-  export type RProxyControllerWithPathPatch = Promise<
-    [any, AgentProxy.ProxyControllerWithPathPatchRes["data"], AgentProxy.ProxyControllerWithPathPatchRes]
-  >
-  export type RProxyControllerWithPathDelete = Promise<
-    [any, AgentProxy.ProxyControllerWithPathDeleteRes["data"], AgentProxy.ProxyControllerWithPathDeleteRes]
-  >
-  export type RProxyControllerWithPathOptions = Promise<
-    [any, AgentProxy.ProxyControllerWithPathOptionsRes["data"], AgentProxy.ProxyControllerWithPathOptionsRes]
+  export type RProxyWithPathOptions = Promise<
+    [any, AgentProxy.ProxyWithPathOptionsRes["data"], AgentProxy.ProxyWithPathOptionsRes]
   >
 }
 
@@ -1623,7 +1597,7 @@ export namespace Audit {
 }
 
 export namespace FileUpload {
-  export interface FileUploadControllerRes {
+  export interface FileUploadRes {
     /**
      * @example 200
      */
@@ -1635,14 +1609,14 @@ export namespace FileUpload {
     data: __common__.UploadFileResponseDto
   }
 
-  export interface FileUploadControllerParams {
+  export interface FileUploadParams {
     /**
      * @description 容器的唯一标识符 (UUID)
      */
     id: string
   }
 
-  export interface FileUploadControllerBody {
+  export interface FileUploadBody {
     /**
      * @description 要上传的文件
      */
@@ -1654,7 +1628,7 @@ export namespace FileUpload {
     targetDir?: string
   }
 
-  export interface FileUploadControllerInitMultipartRes {
+  export interface FileUploadInitMultipartRes {
     /**
      * @example 200
      */
@@ -1666,7 +1640,7 @@ export namespace FileUpload {
     data: __common__.InitUploadResponseDto
   }
 
-  export interface FileUploadControllerInitMultipartParams {
+  export interface FileUploadInitMultipartParams {
     /**
      * @description 容器的唯一标识符 (UUID)
      */
@@ -1676,9 +1650,9 @@ export namespace FileUpload {
   /**
    * @description 分块上传初始化参数
    */
-  export interface FileUploadControllerInitMultipartBody extends __common__.InitMultipartUploadDto {}
+  export interface FileUploadInitMultipartBody extends __common__.InitMultipartUploadDto {}
 
-  export interface FileUploadControllerChunkRes {
+  export interface FileUploadChunkRes {
     /**
      * @example 200
      */
@@ -1690,7 +1664,7 @@ export namespace FileUpload {
     data: __common__.UploadChunkResponseDto
   }
 
-  export interface FileUploadControllerChunkParams {
+  export interface FileUploadChunkParams {
     /**
      * @description 容器的唯一标识符 (UUID)
      */
@@ -1701,7 +1675,7 @@ export namespace FileUpload {
     uploadId: string
   }
 
-  export interface FileUploadControllerChunkBody {
+  export interface FileUploadChunkBody {
     /**
      * @description 分块数据
      */
@@ -1712,7 +1686,7 @@ export namespace FileUpload {
     chunkIndex: number
   }
 
-  export interface FileUploadControllerCompleteRes {
+  export interface FileUploadCompleteRes {
     /**
      * @example 200
      */
@@ -1724,7 +1698,7 @@ export namespace FileUpload {
     data: __common__.CompleteUploadResponseDto
   }
 
-  export interface FileUploadControllerCompleteParams {
+  export interface FileUploadCompleteParams {
     /**
      * @description 容器的唯一标识符 (UUID)
      */
@@ -1735,7 +1709,7 @@ export namespace FileUpload {
     uploadId: string
   }
 
-  export interface FileUploadControllerDownloadRes {
+  export interface FileUploadDownloadRes {
     /**
      * @example 400
      */
@@ -1747,7 +1721,7 @@ export namespace FileUpload {
     data: null | null
   }
 
-  export interface FileUploadControllerDownloadParams {
+  export interface FileUploadDownloadParams {
     /**
      * @description 容器的唯一标识符 (UUID)
      */
@@ -1758,23 +1732,18 @@ export namespace FileUpload {
     filePath: string
   }
 
-  export type FileUploadControllerParams1 = FileUploadControllerParams & FileUploadControllerBody
+  export type FileUploadParams1 = FileUploadParams & FileUploadBody
 
-  export type RFileUploadController = Promise<
-    [any, FileUpload.FileUploadControllerRes["data"], FileUpload.FileUploadControllerRes]
-  >
-  export type FileUploadControllerChunkParams1 = FileUploadControllerChunkParams & FileUploadControllerChunkBody
+  export type RFileUpload = Promise<[any, FileUpload.FileUploadRes["data"], FileUpload.FileUploadRes]>
+  export type FileUploadChunkParams1 = FileUploadChunkParams & FileUploadChunkBody
 
-  export type RFileUploadControllerChunk = Promise<
-    [any, FileUpload.FileUploadControllerChunkRes["data"], FileUpload.FileUploadControllerChunkRes]
+  export type RFileUploadChunk = Promise<[any, FileUpload.FileUploadChunkRes["data"], FileUpload.FileUploadChunkRes]>
+  export type RFileUploadComplete = Promise<
+    [any, FileUpload.FileUploadCompleteRes["data"], FileUpload.FileUploadCompleteRes]
   >
-  export type RFileUploadControllerComplete = Promise<
-    [any, FileUpload.FileUploadControllerCompleteRes["data"], FileUpload.FileUploadControllerCompleteRes]
-  >
-  export type FileUploadControllerInitMultipartParams1 = FileUploadControllerInitMultipartParams &
-    __common__.InitMultipartUploadDto
+  export type FileUploadInitMultipartParams1 = FileUploadInitMultipartParams & __common__.InitMultipartUploadDto
 
-  export type RFileUploadControllerInitMultipart = Promise<
-    [any, FileUpload.FileUploadControllerInitMultipartRes["data"], FileUpload.FileUploadControllerInitMultipartRes]
+  export type RFileUploadInitMultipart = Promise<
+    [any, FileUpload.FileUploadInitMultipartRes["data"], FileUpload.FileUploadInitMultipartRes]
   >
 }

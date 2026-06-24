@@ -19,7 +19,7 @@ export default class FileUpload extends ApiClient {
    * @summary 单文件直传到工作区
    * @description 上传单个文件到容器对应的工作区目录，支持指定子目录
    */
-  fileUploadController(params: types.FileUploadControllerParams1) {
+  fileUpload(params: types.FileUploadParams1) {
     const { id, ...body } = params
     const contentType = "multipart/form-data"
     const formData = this.formData(body, contentType)
@@ -30,14 +30,14 @@ export default class FileUpload extends ApiClient {
       headers: { "Content-Type": contentType },
       method: "post",
     }
-    return this.request<types.RFileUploadController>(config)
+    return this.request<types.RFileUpload>(config)
   }
 
   /**
    * @summary 上传单个分块
    * @description 上传分块数据到指定的上传会话
    */
-  fileUploadControllerChunk(params: types.FileUploadControllerChunkParams1) {
+  fileUploadChunk(params: types.FileUploadChunkParams1) {
     const { id, uploadId, ...body } = params
     const contentType = "multipart/form-data"
     const formData = this.formData(body, contentType)
@@ -48,24 +48,24 @@ export default class FileUpload extends ApiClient {
       headers: { "Content-Type": contentType },
       method: "post",
     }
-    return this.request<types.RFileUploadControllerChunk>(config)
+    return this.request<types.RFileUploadChunk>(config)
   }
 
   /**
    * @summary 完成分块上传
    * @description 合并所有分块为完整文件
    */
-  fileUploadControllerComplete({ id, uploadId }: types.FileUploadControllerCompleteParams) {
+  fileUploadComplete({ id, uploadId }: types.FileUploadCompleteParams) {
     const url = `/containers/${id}/workspace/upload/multipart/${uploadId}/complete`
     const config: DocReqConfig = { url, method: "post" }
-    return this.request<types.RFileUploadControllerComplete>(config)
+    return this.request<types.RFileUploadComplete>(config)
   }
 
   /**
    * @summary 从工作区下载文件
    * @description 下载容器工作区中的文件，文件路径必须以 /workspace 开头
    */
-  fileUploadControllerDownload(params: types.FileUploadControllerDownloadParams) {
+  fileUploadDownload(params: types.FileUploadDownloadParams) {
     const { id, ...query } = params
     const url = `/containers/${id}/workspace/upload/download?${this.serialize(query)}`
     const config: DocReqConfig = { url, method: "get" }
@@ -76,11 +76,11 @@ export default class FileUpload extends ApiClient {
    * @summary 初始化分块上传
    * @description 创建分块上传会话，返回 uploadId 用于后续分块上传
    */
-  fileUploadControllerInitMultipart(params: types.FileUploadControllerInitMultipartParams1) {
+  fileUploadInitMultipart(params: types.FileUploadInitMultipartParams1) {
     const { id, ...body } = params
     const url = `/containers/${id}/workspace/upload/multipart/init`
     const config: DocReqConfig = { url, body, method: "post" }
-    return this.request<types.RFileUploadControllerInitMultipart>(config)
+    return this.request<types.RFileUploadInitMultipart>(config)
   }
 }
 export const fileUpload = new FileUpload()
