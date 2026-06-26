@@ -26,12 +26,11 @@ export default class Agents extends ApiClient {
   }
 
   /**
-   * @param { AgentType } agentType Agent 类型筛选（cloud 或 local）
    * @summary 获取用户的 Agent 列表
-   * @description 返回当前用户的所有 Agent，支持按类型筛选
+   * @description 返回当前用户的所有 Agent，支持按类型筛选。当 autoCreate=1 且用户无可用 Agent 时，自动为用户创建一个 OpenCode 容器并返回。
    */
-  agentsList(agentType?: AgentType) {
-    const url = `/agents?${this.serialize({ agentType })}`
+  agentsList(query: types.AgentsListParams) {
+    const url = `/agents?${this.serialize(query)}`
     const config: DocReqConfig = { url, method: "get" }
     return this.request<types.RAgentsList>(config)
   }

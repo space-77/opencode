@@ -1035,6 +1035,10 @@ export namespace Agents {
      * @description Agent 类型筛选（cloud 或 local）
      */
     agentType?: EnumLists.AgentType
+    /**
+     * @description 当无可用 Agent 时是否自动创建容器（0 或 1，默认 0）
+     */
+    autoCreate?: string
   }
 
   export interface AgentsGetRes {
