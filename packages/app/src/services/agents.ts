@@ -27,7 +27,7 @@ export default class Agents extends ApiClient {
 
   /**
    * @summary 获取用户的 Agent 列表
-   * @description 返回当前用户的所有 Agent，支持按类型筛选。当 autoCreate=1 且用户无可用 Agent 时，自动为用户创建一个 OpenCode 容器并返回。
+   * @description 返回当前用户的所有 Agent，支持按类型筛选。当 autoCreate=1 时：若用户无 Agent 则自动创建一个 OpenCode 容器；若用户已有处于休眠(STOPPED)或异常(ERROR)状态的容器则自动唤醒后返回。
    */
   agentsList(query: types.AgentsListParams) {
     const url = `/agents?${this.serialize(query)}`

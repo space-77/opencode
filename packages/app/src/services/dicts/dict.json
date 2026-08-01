@@ -44,7 +44,9 @@
       "post_/containers/{id}/workspace/upload/multipart/init": "FileUpload_initMultipartUpload",
       "post_/containers/{id}/workspace/upload/multipart/{uploadId}/chunk": "FileUpload_uploadChunk",
       "post_/containers/{id}/workspace/upload/multipart/{uploadId}/complete": "FileUpload_completeUpload",
-      "get_/containers/{id}/workspace/upload/download": "FileUpload_downloadFile"
+      "get_/containers/{id}/workspace/upload/download": "FileUpload_downloadFile",
+      "post_/containers/{id}/workspace/upload/download-token": "FileUploadController_issueDownloadToken",
+      "post_/containers/{id}/workspace/upload/callback": "FileUploadController_onlyOfficeCallback"
     },
     "returnTypeNames": {},
     "requestTypeNames": {},

@@ -842,6 +842,52 @@ export namespace __common__ {
     path: string
   }
 
+  export interface DownloadTokenDto {
+    /**
+     * @example /workspace/uploads/document.pdf
+     * @description 要下载的文件路径，必须以 /workspace 开头
+     */
+    filePath: string
+    /**
+     * @example true
+     * @description 是否为在线编辑申请（附带保存回调 token），默认 false 仅预览
+     */
+    mode?: string
+  }
+
+  export interface DownloadTokenResponseDto {
+    /**
+     * @example /containers/:id/workspace/upload/download?filePath=/workspace/a.docx&token=xxx
+     * @description 带短时 token 的下载 URL（相对路径，前端需拼接 BASE_URL）
+     */
+    downloadUrl: string
+    /**
+     * @example /containers/:id/workspace/upload/callback?filePath=/workspace/a.docx&token=xxx
+     * @description 带短时 token 的保存回调 URL（仅编辑模式返回，相对路径，前端需拼接 BASE_URL）
+     */
+    callbackUrl?: string
+  }
+
+  export interface OnlyOfficeCallbackDto {
+    /**
+     * @example 2
+     * @description ONLYOFFICE 回调状态：1 就绪/2 保存中/3 出错/4 无变化/6 编辑中/7 强制保存
+     */
+    status: number
+    /**
+     * @description 文档服务器上最新文档的临时下载地址（保存时提供）
+     */
+    url?: string
+    /**
+     * @description 文档唯一 key
+     */
+    key?: string
+    /**
+     * @description 编辑用户列表
+     */
+    users?: Array<string>
+  }
+
   export interface LogsT {
     /**
      * @example 2024-01-15T10:30:00Z
@@ -1036,7 +1082,7 @@ export namespace Agents {
      */
     agentType?: EnumLists.AgentType
     /**
-     * @description 当无可用 Agent 时是否自动创建容器（0 或 1，默认 0）
+     * @description 当无可用 Agent 时自动创建容器，或唤醒已休眠/异常容器（0 或 1，默认 0）
      */
     autoCreate?: string
   }
@@ -1734,7 +1780,61 @@ export namespace FileUpload {
      * @description 要下载的文件路径，必须以 /workspace 开头
      */
     filePath: string
+    /**
+     * @description 可选：download-token 接口签发的短时访问 token
+     */
+    token?: string
   }
+
+  export interface FileUploadControllerIssueDownloadRes {
+    /**
+     * @example 200
+     */
+    code: number
+    /**
+     * @example success
+     */
+    message: string
+    data: __common__.DownloadTokenResponseDto
+  }
+
+  export interface FileUploadControllerIssueDownloadParams {
+    /**
+     * @description 容器的唯一标识符 (UUID)
+     */
+    id: string
+  }
+
+  export interface FileUploadControllerIssueDownloadBody extends __common__.DownloadTokenDto {}
+
+  export interface FileUploadControllerOnlyOfficeRes {
+    /**
+     * @example 401
+     */
+    code: number
+    /**
+     * @example token 无效或已过期
+     */
+    message: string
+    data: null | null
+  }
+
+  export interface FileUploadControllerOnlyOfficeParams {
+    /**
+     * @description 容器的唯一标识符 (UUID)
+     */
+    id: string
+    /**
+     * @description 要写回的文件路径，必须以 /workspace 开头
+     */
+    filePath: string
+    /**
+     * @description download-token 接口签发的保存回调 token
+     */
+    token: string
+  }
+
+  export interface FileUploadControllerOnlyOfficeBody extends __common__.OnlyOfficeCallbackDto {}
 
   export type FileUploadParams1 = FileUploadParams & FileUploadBody
 
@@ -1749,5 +1849,17 @@ export namespace FileUpload {
 
   export type RFileUploadInitMultipart = Promise<
     [any, FileUpload.FileUploadInitMultipartRes["data"], FileUpload.FileUploadInitMultipartRes]
+  >
+  export type FileUploadControllerOnlyOfficeParams1 = FileUploadControllerOnlyOfficeParams &
+    __common__.OnlyOfficeCallbackDto
+
+  export type RFileUploadControllerOnlyOffice = Promise<
+    [any, FileUpload.FileUploadControllerOnlyOfficeRes["data"], FileUpload.FileUploadControllerOnlyOfficeRes]
+  >
+  export type FileUploadControllerIssueDownloadParams1 = FileUploadControllerIssueDownloadParams &
+    __common__.DownloadTokenDto
+
+  export type RFileUploadControllerIssueDownload = Promise<
+    [any, FileUpload.FileUploadControllerIssueDownloadRes["data"], FileUpload.FileUploadControllerIssueDownloadRes]
   >
 }
