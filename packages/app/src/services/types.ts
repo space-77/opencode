@@ -104,7 +104,7 @@ export namespace __common__ {
      */
     agentVersion: string | null
     /**
-     * @example /workspace
+     * @example /workspace/default
      * @description 工作目录路径
      */
     workDirectory: string
@@ -292,7 +292,7 @@ export namespace __common__ {
        */
       agentVersion: string | null
       /**
-       * @example /workspace
+       * @example /workspace/default
        * @description 工作目录路径
        */
       workDirectory: string
@@ -886,6 +886,22 @@ export namespace __common__ {
      * @description 编辑用户列表
      */
     users?: Array<string>
+  }
+
+  export interface ConvertMarkdownToWordDto {
+    /**
+     * @example /workspace/default/docs/text.md
+     * @description 要转换的 Markdown 文件路径，必须以 /workspace/ 开头且以 .md 结尾
+     */
+    filePath: string
+  }
+
+  export interface ConvertMarkdownToWordResponseDto {
+    /**
+     * @example /workspace/default/temp/a1b2c3d4e5f6.docx
+     * @description 转换后的 Word 文件路径（/workspace 开头，可直接用于下载接口）
+     */
+    path: string
   }
 
   export interface LogsT {
@@ -1678,6 +1694,27 @@ export namespace FileUpload {
     targetDir?: string
   }
 
+  export interface FileUploadControllerConvertMarkdownRes {
+    /**
+     * @example 200
+     */
+    code: number
+    /**
+     * @example success
+     */
+    message: string
+    data: __common__.ConvertMarkdownToWordResponseDto
+  }
+
+  export interface FileUploadControllerConvertMarkdownParams {
+    /**
+     * @description 容器的唯一标识符 (UUID)
+     */
+    id: string
+  }
+
+  export interface FileUploadControllerConvertMarkdownBody extends __common__.ConvertMarkdownToWordDto {}
+
   export interface FileUploadInitMultipartRes {
     /**
      * @example 200
@@ -1861,5 +1898,11 @@ export namespace FileUpload {
 
   export type RFileUploadControllerIssueDownload = Promise<
     [any, FileUpload.FileUploadControllerIssueDownloadRes["data"], FileUpload.FileUploadControllerIssueDownloadRes]
+  >
+  export type FileUploadControllerConvertMarkdownParams1 = FileUploadControllerConvertMarkdownParams &
+    __common__.ConvertMarkdownToWordDto
+
+  export type RFileUploadControllerConvertMarkdown = Promise<
+    [any, FileUpload.FileUploadControllerConvertMarkdownRes["data"], FileUpload.FileUploadControllerConvertMarkdownRes]
   >
 }

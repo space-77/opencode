@@ -107,5 +107,16 @@ export default class FileUpload extends ApiClient {
     const config: DocReqConfig = { url, body, method: "post" }
     return this.request<types.RFileUploadControllerIssueDownload>(config)
   }
+
+  /**
+   * @summary Markdown 转 Word 文档
+   * @description 将容器工作区中的 Markdown 文件转换为 Word（.docx）文档，产物以源文件内容 MD5 命名并输出到项目目录的 temp 子目录下。若产物已存在则直接返回路径（幂等）。返回的路径可直接用于 download 接口下载。
+   */
+  fileUploadControllerConvertMarkdown(params: types.FileUploadControllerConvertMarkdownParams1) {
+    const { id, ...body } = params
+    const url = `/containers/${id}/workspace/upload/md-to-word`
+    const config: DocReqConfig = { url, body, method: "post" }
+    return this.request<types.RFileUploadControllerConvertMarkdown>(config)
+  }
 }
 export const fileUpload = new FileUpload()
