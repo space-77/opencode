@@ -904,6 +904,69 @@ export namespace __common__ {
     path: string
   }
 
+  export interface CreateFileDto {
+    /**
+     * @example /workspace/default/project/note.md
+     * @description 要创建的文件路径，必须以 /workspace/ 开头（容器工作区路径，映射到宿主机 userData/{userId}/workspace）
+     */
+    filePath: string
+    /**
+* @example # 标题
+正文
+* @description 文件初始内容，缺省为空字符串
+*/
+    content?: string
+    /**
+     * @description 文件已存在时是否覆盖，默认 false（不覆盖，返回 409）
+     */
+    overwrite?: boolean
+  }
+
+  export interface UpdateFileDto {
+    /**
+     * @example /workspace/default/project/note.md
+     * @description 要修改的文件路径，必须以 /workspace/ 开头（容器工作区路径，映射到宿主机 userData/{userId}/workspace）
+     */
+    filePath: string
+    /**
+     * @example 全新内容
+     * @description 目标内容。不传 startLine/endLine 时为全文覆盖；传行号时替换闭区间 [startLine, endLine] 内的行，空串表示删除该行范围
+     */
+    content: string
+    /**
+     * @example 2
+     * @description 起始行号（从 1 开始），与 endLine 组成闭区间替换范围
+     */
+    startLine?: number
+    /**
+     * @example 3
+     * @description 结束行号（从 1 开始，含），最大允许 总行数 + 1（末尾追加）
+     */
+    endLine?: number
+  }
+
+  export interface WorkspaceFilePathResponseDto {
+    /**
+     * @example /workspace/default/project/note.md
+     * @description 文件在工作区内的完整路径
+     */
+    path: string
+  }
+
+  export interface WorkspaceFileContentResponseDto {
+    /**
+     * @example /workspace/default/project/note.md
+     * @description 文件在工作区内的完整路径
+     */
+    path: string
+    /**
+* @example # 标题
+正文
+* @description 文件内容（UTF-8 文本）
+*/
+    content: string
+  }
+
   export interface LogsT {
     /**
      * @example 2024-01-15T10:30:00Z
@@ -1904,5 +1967,116 @@ export namespace FileUpload {
 
   export type RFileUploadControllerConvertMarkdown = Promise<
     [any, FileUpload.FileUploadControllerConvertMarkdownRes["data"], FileUpload.FileUploadControllerConvertMarkdownRes]
+  >
+}
+
+export namespace WorkspaceFile {
+  export interface WorkspaceFileControllerGetContentRes {
+    /**
+     * @example 200
+     */
+    code: number
+    /**
+     * @example success
+     */
+    message: string
+    data: __common__.WorkspaceFileContentResponseDto
+  }
+
+  export interface WorkspaceFileControllerGetContentParams {
+    /**
+     * @description 容器的唯一标识符 (UUID)
+     */
+    id: string
+    /**
+     * @description 要读取的文件路径，必须以 /workspace 开头
+     */
+    filePath: string
+  }
+
+  export interface WorkspaceFileControllerCreateRes {
+    /**
+     * @example 200
+     */
+    code: number
+    /**
+     * @example success
+     */
+    message: string
+    data: __common__.WorkspaceFilePathResponseDto
+  }
+
+  export interface WorkspaceFileControllerCreateParams {
+    /**
+     * @description 容器的唯一标识符 (UUID)
+     */
+    id: string
+  }
+
+  export interface WorkspaceFileControllerCreateBody extends __common__.CreateFileDto {}
+
+  export interface WorkspaceFileControllerDeleteRes {
+    /**
+     * @example 200
+     */
+    code: number
+    /**
+     * @example success
+     */
+    message: string
+    data: __common__.WorkspaceFilePathResponseDto
+  }
+
+  export interface WorkspaceFileControllerDeleteParams {
+    /**
+     * @description 容器的唯一标识符 (UUID)
+     */
+    id: string
+    /**
+     * @description 要删除的文件路径，必须以 /workspace 开头
+     */
+    filePath: string
+  }
+
+  export interface WorkspaceFileControllerUpdateRes {
+    /**
+     * @example 200
+     */
+    code: number
+    /**
+     * @example success
+     */
+    message: string
+    data: __common__.WorkspaceFilePathResponseDto
+  }
+
+  export interface WorkspaceFileControllerUpdateParams {
+    /**
+     * @description 容器的唯一标识符 (UUID)
+     */
+    id: string
+  }
+
+  export interface WorkspaceFileControllerUpdateBody extends __common__.UpdateFileDto {}
+
+  export type WorkspaceFileControllerCreateParams1 = WorkspaceFileControllerCreateParams & __common__.CreateFileDto
+
+  export type RWorkspaceFileControllerCreate = Promise<
+    [any, WorkspaceFile.WorkspaceFileControllerCreateRes["data"], WorkspaceFile.WorkspaceFileControllerCreateRes]
+  >
+  export type RWorkspaceFileControllerDelete = Promise<
+    [any, WorkspaceFile.WorkspaceFileControllerDeleteRes["data"], WorkspaceFile.WorkspaceFileControllerDeleteRes]
+  >
+  export type WorkspaceFileControllerUpdateParams1 = WorkspaceFileControllerUpdateParams & __common__.UpdateFileDto
+
+  export type RWorkspaceFileControllerUpdate = Promise<
+    [any, WorkspaceFile.WorkspaceFileControllerUpdateRes["data"], WorkspaceFile.WorkspaceFileControllerUpdateRes]
+  >
+  export type RWorkspaceFileControllerGetContent = Promise<
+    [
+      any,
+      WorkspaceFile.WorkspaceFileControllerGetContentRes["data"],
+      WorkspaceFile.WorkspaceFileControllerGetContentRes,
+    ]
   >
 }

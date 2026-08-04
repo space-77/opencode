@@ -47,7 +47,11 @@
       "get_/containers/{id}/workspace/upload/download": "FileUpload_downloadFile",
       "post_/containers/{id}/workspace/upload/download-token": "FileUploadController_issueDownloadToken",
       "post_/containers/{id}/workspace/upload/callback": "FileUploadController_onlyOfficeCallback",
-      "post_/containers/{id}/workspace/upload/md-to-word": "FileUploadController_convertMarkdownToWord"
+      "post_/containers/{id}/workspace/upload/md-to-word": "FileUploadController_convertMarkdownToWord",
+      "post_/containers/{id}/workspace/file": "WorkspaceFileController_createFile",
+      "patch_/containers/{id}/workspace/file": "WorkspaceFileController_updateFile",
+      "delete_/containers/{id}/workspace/file": "WorkspaceFileController_deleteFile",
+      "get_/containers/{id}/workspace/file": "WorkspaceFileController_getFileContent"
     },
     "returnTypeNames": {},
     "requestTypeNames": {},
