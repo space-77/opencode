@@ -51,7 +51,15 @@
       "post_/containers/{id}/workspace/file": "WorkspaceFileController_createFile",
       "patch_/containers/{id}/workspace/file": "WorkspaceFileController_updateFile",
       "delete_/containers/{id}/workspace/file": "WorkspaceFileController_deleteFile",
-      "get_/containers/{id}/workspace/file": "WorkspaceFileController_getFileContent"
+      "get_/containers/{id}/workspace/file": "WorkspaceFileController_getFileContent",
+      "patch_/containers/{id}/workspace/file/rename": "WorkspaceFileController_renameFile",
+      "patch_/containers/{id}/workspace/file/move": "WorkspaceFileController_moveFile",
+      "post_/feedback": "FeedbackController_create",
+      "get_/feedback": "FeedbackController_findMany",
+      "delete_/feedback/{id}": "FeedbackController_remove",
+      "put_/feedback/{id}": "FeedbackController_update",
+      "get_/feedback/{id}": "FeedbackController_findOne",
+      "post_/feedback/upload": "FeedbackController_uploadFile"
     },
     "returnTypeNames": {},
     "requestTypeNames": {},

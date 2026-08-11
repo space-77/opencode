@@ -42,6 +42,10 @@ export namespace EnumLists {
     "success" = "success",
     "failed" = "failed",
   }
+  export enum Type {
+    "positive" = "positive",
+    "negative" = "negative",
+  }
 }
 
 export namespace __common__ {
@@ -762,15 +766,15 @@ export namespace __common__ {
 
   export interface UploadFileResponseDto {
     /**
-     * @example document.pdf
-     * @description 文件名
+     * @example https://testai.maxrocky.com/filedown/maximum-ai/feedback/user123/1-x.png?X-Amz-...
+     * @description 上传后的 MinIO 签名访问 URL（默认 1 小时有效）
      */
-    filename: string
+    url: string
     /**
-     * @example /workspace/uploads/document.pdf
-     * @description 文件在工作区内的完整路径
+     * @example feedback/user123/1786437212589-x.png
+     * @description MinIO 对象 key
      */
-    path: string
+    objectKey: string
   }
 
   export interface InitMultipartUploadDto {
@@ -945,6 +949,40 @@ export namespace __common__ {
     endLine?: number
   }
 
+  export interface RenameFileDto {
+    /**
+     * @example /workspace/default/project/note.md
+     * @description 要重命名的文件或目录路径，必须以 /workspace/ 开头
+     */
+    filePath: string
+    /**
+     * @example readme.md
+     * @description 新文件名（纯文件名，不含路径分隔符 / \ .. 及空字节）
+     */
+    newFilename: string
+    /**
+     * @description 目标已存在时是否覆盖，默认 false（返回 409）
+     */
+    overwrite?: boolean
+  }
+
+  export interface MoveFileDto {
+    /**
+     * @example /workspace/default/project/note.md
+     * @description 要移动的文件或目录路径，必须以 /workspace/ 开头
+     */
+    filePath: string
+    /**
+     * @example /workspace/default/archive
+     * @description 目标目录路径，必须以 /workspace/ 开头；不存在时递归创建，文件/目录保留原名移入
+     */
+    targetDir: string
+    /**
+     * @description 目标位置已存在同名时是否覆盖，默认 false（返回 409）
+     */
+    overwrite?: boolean
+  }
+
   export interface WorkspaceFilePathResponseDto {
     /**
      * @example /workspace/default/project/note.md
@@ -965,6 +1003,150 @@ export namespace __common__ {
 * @description 文件内容（UTF-8 文本）
 */
     content: string
+  }
+
+  export interface CreateFeedbackDto {
+    /**
+     * @example positive
+     * @description 反馈类型：positive（功能很赞）/ negative（功能有问题）
+     */
+    type: EnumLists.Type
+    /**
+     * @example <p>功能很赞</p>
+     * @description 富文本内容，入库前会将 MinIO 签名 URL 归一化为标记存储
+     */
+    content: string
+    /**
+     * @example [{"question":"q","answer":"a"}]
+     * @description 消息列表 JSON 字符串，格式 { question: string; answer: string }[]
+     */
+    messages?: string
+  }
+
+  export interface UpdateFeedbackDto {
+    /**
+     * @example negative
+     * @description 反馈类型：positive（功能很赞）/ negative（功能有问题）
+     */
+    type?: EnumLists.Type
+    /**
+     * @example <p>功能有问题</p>
+     * @description 富文本内容，入库前会将 MinIO 签名 URL 归一化为标记存储
+     */
+    content?: string
+    /**
+     * @example [{"question":"q","answer":"a"}]
+     * @description 消息列表 JSON 字符串，格式 { question: string; answer: string }[]
+     */
+    messages?: string
+  }
+
+  export interface QueryFeedbackDto {
+    /**
+     * @example 1
+     * @description 页码，从 1 开始
+     */
+    page?: number
+    /**
+     * @example 10
+     * @description 每页数量，最大 100
+     */
+    pageSize?: number
+    /**
+     * @example positive
+     * @description 反馈类型过滤：positive / negative
+     */
+    type?: EnumLists.Type
+  }
+
+  export interface FeedbackResponseDto {
+    /**
+     * @example 123e4567-e89b-12d3-a456-426614174000
+     * @description 反馈唯一标识符 (UUID)
+     */
+    id: string
+    /**
+     * @example user123
+     * @description 用户 ID
+     */
+    userId: string
+    /**
+     * @example positive
+     * @description 反馈类型
+     */
+    type: EnumLists.Type
+    /**
+     * @description 富文本内容（详情接口已将 MinIO 标记还原为签名 URL；列表接口为归一化存储内容）
+     */
+    content: string
+    /**
+     * @description 消息列表 JSON 字符串，格式 { question: string; answer: string }[]
+     */
+    messages: string | null
+    /**
+     * @example 2024-01-15T10:00:00.000Z
+     * @description 创建时间
+     */
+    createdAt: string
+    /**
+     * @example 2024-01-15T10:30:00.000Z
+     * @description 更新时间
+     */
+    updatedAt: string
+  }
+
+  export interface FeedbackListItemDto {
+    /**
+     * @example 123e4567-e89b-12d3-a456-426614174000
+     * @description 反馈唯一标识符 (UUID)
+     */
+    id: string
+    /**
+     * @example user123
+     * @description 用户 ID
+     */
+    userId: string
+    /**
+     * @example positive
+     * @description 反馈类型
+     */
+    type: EnumLists.Type
+    /**
+     * @description 富文本内容（归一化存储内容）
+     */
+    content: string
+    /**
+     * @example 2024-01-15T10:00:00.000Z
+     * @description 创建时间
+     */
+    createdAt: string
+    /**
+     * @example 2024-01-15T10:30:00.000Z
+     * @description 更新时间
+     */
+    updatedAt: string
+  }
+
+  export interface PaginatedFeedbackListItemDto {
+    /**
+     * @description 数据列表
+     */
+    items: Array<__common__.FeedbackListItemDto>
+    /**
+     * @example 100
+     * @description 总记录数
+     */
+    total: number
+    /**
+     * @example 1
+     * @description 当前页码
+     */
+    page: number
+    /**
+     * @example 20
+     * @description 每页数量
+     */
+    pageSize: number
   }
 
   export interface LogsT {
@@ -2059,6 +2241,53 @@ export namespace WorkspaceFile {
 
   export interface WorkspaceFileControllerUpdateBody extends __common__.UpdateFileDto {}
 
+  export interface WorkspaceFileControllerRenameRes {
+    /**
+     * @example 200
+     */
+    code: number
+    /**
+     * @example success
+     */
+    message: string
+    data: __common__.WorkspaceFilePathResponseDto
+  }
+
+  export interface WorkspaceFileControllerRenameParams {
+    /**
+     * @description 容器的唯一标识符 (UUID)
+     */
+    id: string
+  }
+
+  export interface WorkspaceFileControllerRenameBody extends __common__.RenameFileDto {}
+
+  export interface WorkspaceFileControllerMoveRes {
+    /**
+     * @example 200
+     */
+    code: number
+    /**
+     * @example success
+     */
+    message: string
+    data: __common__.WorkspaceFilePathResponseDto
+  }
+
+  export interface WorkspaceFileControllerMoveParams {
+    /**
+     * @description 容器的唯一标识符 (UUID)
+     */
+    id: string
+  }
+
+  export interface WorkspaceFileControllerMoveBody extends __common__.MoveFileDto {}
+
+  export type WorkspaceFileControllerMoveParams1 = WorkspaceFileControllerMoveParams & __common__.MoveFileDto
+
+  export type RWorkspaceFileControllerMove = Promise<
+    [any, WorkspaceFile.WorkspaceFileControllerMoveRes["data"], WorkspaceFile.WorkspaceFileControllerMoveRes]
+  >
   export type WorkspaceFileControllerCreateParams1 = WorkspaceFileControllerCreateParams & __common__.CreateFileDto
 
   export type RWorkspaceFileControllerCreate = Promise<
@@ -2072,11 +2301,162 @@ export namespace WorkspaceFile {
   export type RWorkspaceFileControllerUpdate = Promise<
     [any, WorkspaceFile.WorkspaceFileControllerUpdateRes["data"], WorkspaceFile.WorkspaceFileControllerUpdateRes]
   >
+  export type WorkspaceFileControllerRenameParams1 = WorkspaceFileControllerRenameParams & __common__.RenameFileDto
+
+  export type RWorkspaceFileControllerRename = Promise<
+    [any, WorkspaceFile.WorkspaceFileControllerRenameRes["data"], WorkspaceFile.WorkspaceFileControllerRenameRes]
+  >
   export type RWorkspaceFileControllerGetContent = Promise<
     [
       any,
       WorkspaceFile.WorkspaceFileControllerGetContentRes["data"],
       WorkspaceFile.WorkspaceFileControllerGetContentRes,
     ]
+  >
+}
+
+export namespace Feedback {
+  export interface FeedbackControllerFindManyRes {
+    /**
+     * @example 200
+     */
+    code: number
+    /**
+     * @example success
+     */
+    message: string
+    data: __common__.PaginatedFeedbackListItemDto
+  }
+
+  export interface FeedbackControllerFindManyParams {
+    /**
+     * @description 页码，从 1 开始
+     */
+    page?: number
+    /**
+     * @description 每页数量，最大 100
+     */
+    pageSize?: number
+    /**
+     * @description 反馈类型过滤：positive / negative
+     */
+    type?: EnumLists.Type
+  }
+
+  export interface FeedbackControllerCreateRes {
+    /**
+     * @example 200
+     */
+    code: number
+    /**
+     * @example success
+     */
+    message: string
+    data: __common__.FeedbackResponseDto
+  }
+
+  export interface FeedbackControllerCreateParams {}
+
+  export interface FeedbackControllerCreateBody extends __common__.CreateFeedbackDto {}
+
+  export interface FeedbackControllerFindOneRes {
+    /**
+     * @example 200
+     */
+    code: number
+    /**
+     * @example success
+     */
+    message: string
+    data: __common__.FeedbackResponseDto
+  }
+
+  export interface FeedbackControllerFindOneParams {
+    /**
+     * @description 反馈 ID (UUID)
+     */
+    id: string
+  }
+
+  export interface FeedbackControllerUpdateRes {
+    /**
+     * @example 200
+     */
+    code: number
+    /**
+     * @example success
+     */
+    message: string
+    data: __common__.FeedbackResponseDto
+  }
+
+  export interface FeedbackControllerUpdateParams {
+    /**
+     * @description 反馈 ID (UUID)
+     */
+    id: string
+  }
+
+  export interface FeedbackControllerUpdateBody extends __common__.UpdateFeedbackDto {}
+
+  export interface FeedbackControllerRemoveRes {
+    /**
+     * @example 200
+     */
+    code: number
+    /**
+     * @example success
+     */
+    message: string
+    data: any | null
+  }
+
+  export interface FeedbackControllerRemoveParams {
+    /**
+     * @description 反馈 ID (UUID)
+     */
+    id: string
+  }
+
+  export interface FeedbackControllerUploadFileRes {
+    /**
+     * @example 200
+     */
+    code: number
+    /**
+     * @example success
+     */
+    message: string
+    data: __common__.UploadFileResponseDto
+  }
+
+  export interface FeedbackControllerUploadFileParams {}
+
+  export interface FeedbackControllerUploadFileBody {
+    /**
+     * @description 要上传的文件
+     */
+    file: File
+  }
+
+  export type RFeedbackControllerCreate = Promise<
+    [any, Feedback.FeedbackControllerCreateRes["data"], Feedback.FeedbackControllerCreateRes]
+  >
+  export type FeedbackControllerUpdateParams1 = FeedbackControllerUpdateParams & __common__.UpdateFeedbackDto
+
+  export type RFeedbackControllerUpdate = Promise<
+    [any, Feedback.FeedbackControllerUpdateRes["data"], Feedback.FeedbackControllerUpdateRes]
+  >
+  export type RFeedbackControllerRemove = Promise<
+    [any, Feedback.FeedbackControllerRemoveRes["data"], Feedback.FeedbackControllerRemoveRes]
+  >
+  export type RFeedbackControllerFindOne = Promise<
+    [any, Feedback.FeedbackControllerFindOneRes["data"], Feedback.FeedbackControllerFindOneRes]
+  >
+  export type RFeedbackControllerFindMany = Promise<
+    [any, Feedback.FeedbackControllerFindManyRes["data"], Feedback.FeedbackControllerFindManyRes]
+  >
+  export type RFeedbackControllerUploadFile = Promise<
+    [any, Feedback.FeedbackControllerUploadFileRes["data"], Feedback.FeedbackControllerUploadFileRes]
   >
 }
