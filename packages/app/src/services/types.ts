@@ -15,6 +15,7 @@ export namespace EnumLists {
     "running" = "running",
     "stopped" = "stopped",
     "error" = "error",
+    "destroyed" = "destroyed",
   }
   export enum AgentType {
     "cloud" = "cloud",
@@ -407,6 +408,85 @@ export namespace __common__ {
     } | null
   }
 
+  export interface QueryContainersDto {
+    /**
+     * @example 1
+     * @description 页码（从 1 开始）
+     */
+    page?: number
+    /**
+     * @example 20
+     * @description 每页条数（最大 100）
+     */
+    pageSize?: number
+    /**
+     * @description 按容器状态过滤
+     */
+    status?: EnumLists.Status
+    /**
+     * @example dev
+     * @description 按 agentName 模糊匹配（大小写不敏感）
+     */
+    keyword?: string
+  }
+
+  export interface PaginatedContainersResponseDto {
+    /**
+     * @description 容器列表
+     */
+    items: Array<__common__.ContainerEntity>
+    /**
+     * @example 42
+     * @description 符合条件的总数
+     */
+    total: number
+    /**
+     * @example 1
+     * @description 当前页码
+     */
+    page: number
+    /**
+     * @example 20
+     * @description 每页条数
+     */
+    pageSize: number
+  }
+
+  export interface UpdateContainerDto {
+    /**
+     * @example my-dev-agent
+     * @description Agent 名称（同一 userId + agentType 下唯一）
+     */
+    agentName?: string
+    /**
+     * @example 4
+     * @description CPU 限制（如 "2"、"4"）
+     */
+    cpuLimit?: string
+    /**
+     * @example 4g
+     * @description 内存限制（如 "2g"、"512m"）
+     */
+    memoryLimit?: string
+    /**
+     * @example /workspace/project-x
+     * @description 工作目录路径（容器内绝对路径）
+     */
+    workDirectory?: string
+    /**
+     * @description 当容器处于 RUNNING 状态时，修改 cpuLimit/memoryLimit 后是否立即重启生效（默认 false 仅写入 DB）
+     */
+    restartIfRunning?: boolean
+  }
+
+  export interface ContainerIdResponseDto {
+    /**
+     * @example 123e4567-e89b-12d3-a456-426614174000
+     * @description 被操作的容器 ID
+     */
+    id: string
+  }
+
   export interface HeartbeatDto {
     /**
      * @example 123e4567-e89b-12d3-a456-426614174000
@@ -426,6 +506,316 @@ export namespace __common__ {
      * @description 更新后的心跳时间
      */
     heartbeatAt: string
+  }
+
+  export interface ProjectResponseDto {
+    /**
+     * @example 123e4567-e89b-12d3-a456-426614174000
+     * @description 项目唯一标识符 (UUID)
+     */
+    id: string
+    /**
+     * @example user123
+     * @description 用户 ID
+     */
+    userId: string
+    /**
+     * @example 123e4567-e89b-12d3-a456-426614174000
+     * @description 关联容器 ID
+     */
+    containerId: string
+    /**
+     * @example /workspace/default/my-project
+     * @description 项目工作树路径
+     */
+    worktree: string
+    /**
+     * @example git
+     * @description 版本控制类型
+     */
+    vcs: string | null
+    /**
+     * @example my-project
+     * @description 项目名称
+     */
+    name: string | null
+    /**
+     * @description 项目图标 (JSON 对象)
+     */
+    icon: object | null
+    /**
+     * @description 项目命令 (JSON 对象)
+     */
+    commands: object | null
+    /**
+     * @description 项目时间信息 (JSON 对象: { created, updated, initialized? })
+     */
+    time: object
+    /**
+     * @description 沙箱列表
+     */
+    sandboxes: Array<string>
+    /**
+     * @description 关联的会话 ID 列表
+     */
+    sessionIds: Array<string>
+    /**
+     * @example 2024-01-15T10:00:00.000Z
+     * @description 创建时间
+     */
+    createdAt: string
+    /**
+     * @example 2024-01-15T10:30:00.000Z
+     * @description 更新时间
+     */
+    updatedAt: string
+  }
+
+  export interface ProjectDetailResponseDto {
+    /**
+     * @description 项目元数据
+     */
+    project: {
+      /**
+       * @example 123e4567-e89b-12d3-a456-426614174000
+       * @description 项目唯一标识符 (UUID)
+       */
+      id: string
+      /**
+       * @example user123
+       * @description 用户 ID
+       */
+      userId: string
+      /**
+       * @example 123e4567-e89b-12d3-a456-426614174000
+       * @description 关联容器 ID
+       */
+      containerId: string
+      /**
+       * @example /workspace/default/my-project
+       * @description 项目工作树路径
+       */
+      worktree: string
+      /**
+       * @example git
+       * @description 版本控制类型
+       */
+      vcs: string | null
+      /**
+       * @example my-project
+       * @description 项目名称
+       */
+      name: string | null
+      /**
+       * @description 项目图标 (JSON 对象)
+       */
+      icon: object | null
+      /**
+       * @description 项目命令 (JSON 对象)
+       */
+      commands: object | null
+      /**
+       * @description 项目时间信息 (JSON 对象: { created, updated, initialized? })
+       */
+      time: object
+      /**
+       * @description 沙箱列表
+       */
+      sandboxes: Array<string>
+      /**
+       * @description 关联的会话 ID 列表
+       */
+      sessionIds: Array<string>
+      /**
+       * @example 2024-01-15T10:00:00.000Z
+       * @description 创建时间
+       */
+      createdAt: string
+      /**
+       * @example 2024-01-15T10:30:00.000Z
+       * @description 更新时间
+       */
+      updatedAt: string
+    }
+    /**
+     * @description 容器会话历史数据 ({ data: Session.Info[], cursor: { next?, previous? } })
+     */
+    sessions: object
+    /**
+     * @description 容器会话调用错误说明（null 表示成功）
+     */
+    sessionError: string | null
+  }
+
+  export interface ProjectTimeDto {
+    /**
+     * @example 1700000000000
+     * @description 创建时间戳（毫秒）
+     */
+    created: number
+    /**
+     * @example 1700000000000
+     * @description 更新时间戳（毫秒）
+     */
+    updated: number
+    /**
+     * @example 1700000000000
+     * @description 初始化时间戳（毫秒）
+     */
+    initialized?: number
+  }
+
+  export interface CreateProjectDto {
+    /**
+     * @example 123e4567-e89b-12d3-a456-426614174000
+     * @description 关联容器 ID
+     */
+    containerId: string
+    /**
+     * @example /workspace/default/my-project
+     * @description 项目工作树路径
+     */
+    worktree: string
+    /**
+     * @example git
+     * @description 版本控制类型
+     */
+    vcs?: string
+    /**
+     * @example my-project
+     * @description 项目名称
+     */
+    name?: string
+    /**
+     * @description 项目图标 ({ url?, override?, color? })
+     */
+    icon?: object
+    /**
+     * @description 项目命令 ({ start? })
+     */
+    commands?: object
+    /**
+     * @description 项目时间信息
+     */
+    time: {
+      /**
+       * @example 1700000000000
+       * @description 创建时间戳（毫秒）
+       */
+      created: number
+      /**
+       * @example 1700000000000
+       * @description 更新时间戳（毫秒）
+       */
+      updated: number
+      /**
+       * @example 1700000000000
+       * @description 初始化时间戳（毫秒）
+       */
+      initialized?: number
+    }
+    /**
+     * @description 沙箱列表
+     */
+    sandboxes?: Array<string>
+    /**
+     * @description 关联的会话 ID 列表
+     */
+    sessionIds?: Array<string>
+  }
+
+  export interface UpdateProjectDto {
+    /**
+     * @example git
+     * @description 版本控制类型
+     */
+    vcs?: string
+    /**
+     * @example my-project
+     * @description 项目名称
+     */
+    name?: string
+    /**
+     * @description 项目图标 ({ url?, override?, color? })
+     */
+    icon?: object
+    /**
+     * @description 项目命令 ({ start? })
+     */
+    commands?: object
+    /**
+     * @description 项目时间信息
+     */
+    time?: {
+      /**
+       * @example 1700000000000
+       * @description 创建时间戳（毫秒）
+       */
+      created: number
+      /**
+       * @example 1700000000000
+       * @description 更新时间戳（毫秒）
+       */
+      updated: number
+      /**
+       * @example 1700000000000
+       * @description 初始化时间戳（毫秒）
+       */
+      initialized?: number
+    }
+    /**
+     * @description 沙箱列表
+     */
+    sandboxes?: Array<string>
+    /**
+     * @description 关联的会话 ID 列表
+     */
+    sessionIds?: Array<string>
+  }
+
+  export interface QueryProjectsDto {
+    /**
+     * @example 1
+     * @description 页码，从 1 开始
+     */
+    page?: number
+    /**
+     * @example 20
+     * @description 每页数量，最大 500
+     */
+    pageSize?: number
+    /**
+     * @example 123e4567-e89b-12d3-a456-426614174000
+     * @description 按容器 ID 过滤
+     */
+    containerId?: string
+    /**
+     * @example my-app
+     * @description 按项目名称模糊匹配（大小写不敏感）
+     */
+    keyword?: string
+  }
+
+  export interface PaginatedProjectResponseDto {
+    /**
+     * @description 数据列表
+     */
+    items: Array<__common__.ProjectResponseDto>
+    /**
+     * @example 100
+     * @description 总记录数
+     */
+    total: number
+    /**
+     * @example 1
+     * @description 当前页码
+     */
+    page: number
+    /**
+     * @example 20
+     * @description 每页数量
+     */
+    pageSize: number
   }
 
   export interface ContainerLogsQueryDto {
@@ -1149,6 +1539,106 @@ export namespace __common__ {
     pageSize: number
   }
 
+  export interface WriteAgentsMdDto {
+    /**
+* @example # System Prompt
+You are an opencode agent...
+* @description AGENTS.md 文件内容（全量覆盖写入）
+*/
+    content: string
+  }
+
+  export interface AgentsMdResponseDto {
+    /**
+     * @example AGENTS.md
+     * @description 文件名（固定 AGENTS.md）
+     */
+    path: string
+    /**
+* @example # System Prompt
+...
+* @description 文件内容（UTF-8 文本）
+*/
+    content: string
+    /**
+     * @example 2026-08-18T10:30:00.000Z
+     * @description 最后修改时间（ISO 8601），文件不存在时为 null
+     */
+    lastModified: string | null
+    /**
+     * @example 1024
+     * @description 文件字节数
+     */
+    size: number
+  }
+
+  export interface ConfigFileMetaDto {
+    /**
+     * @example opencode.jsonc
+     * @description 文件名（纯文件名，不含路径）
+     */
+    name: string
+    /**
+     * @example 1024
+     * @description 文件大小（字节数）
+     */
+    size: number
+    /**
+     * @example 2026-08-18T10:30:00.000Z
+     * @description 最后修改时间（ISO 8601）
+     */
+    lastModified: string | null
+  }
+
+  export interface ConfigFileContentDto {
+    /**
+     * @example opencode.jsonc
+     * @description 文件名（纯文件名，不含路径）
+     */
+    name: string
+    /**
+* @example {
+  "theme": "dark"
+}
+* @description 文件内容（UTF-8 文本；userinfo.jsonc 中 access_token 字段会被脱敏为 ***）
+*/
+    content: string
+    /**
+     * @example 2026-08-18T10:30:00.000Z
+     * @description 最后修改时间（ISO 8601）
+     */
+    lastModified: string | null
+    /**
+     * @example 1024
+     * @description 文件大小（字节数）
+     */
+    size: number
+  }
+
+  export interface WriteConfigFileDto {
+    /**
+     * @example opencode.jsonc
+     * @description 文件名（纯文件名，不含路径分隔符）
+     */
+    fileName: string
+    /**
+* @example {
+  "theme": "dark"
+}
+* @description 文件内容（UTF-8 文本）
+*/
+    content: string
+    /**
+     * @description 文件已存在时是否覆盖，默认 false（返回 409）
+     */
+    overwrite?: boolean
+    /**
+     * @example true
+     * @description 是否校验 JSON/JSONC 合法性（仅对 .json / .jsonc 文件生效），默认 true
+     */
+    validateJsonc?: boolean
+  }
+
   export interface LogsT {
     /**
      * @example 2024-01-15T10:30:00Z
@@ -1166,6 +1656,21 @@ export namespace __common__ {
      */
     level?: string
   }
+
+  export type RSecondaryPathControllerForwardRoot = Promise<[any, unknown]>
+  export type RSecondaryPathControllerForwardWith = Promise<[any, unknown]>
+  export type RSecondaryPathControllerForwardRootPut = Promise<[any, unknown]>
+  export type RSecondaryPathControllerForwardWithPut = Promise<[any, unknown]>
+  export type RSecondaryPathControllerForwardRootPost = Promise<[any, unknown]>
+  export type RSecondaryPathControllerForwardRootHead = Promise<[any, unknown]>
+  export type RSecondaryPathControllerForwardWithPost = Promise<[any, unknown]>
+  export type RSecondaryPathControllerForwardWithHead = Promise<[any, unknown]>
+  export type RSecondaryPathControllerForwardRootPatch = Promise<[any, unknown]>
+  export type RSecondaryPathControllerForwardWithPatch = Promise<[any, unknown]>
+  export type RSecondaryPathControllerForwardRootDelete = Promise<[any, unknown]>
+  export type RSecondaryPathControllerForwardWithDelete = Promise<[any, unknown]>
+  export type RSecondaryPathControllerForwardRootOptions = Promise<[any, unknown]>
+  export type RSecondaryPathControllerForwardWithOptions = Promise<[any, unknown]>
 }
 
 export namespace App {
@@ -1190,6 +1695,37 @@ export namespace App {
 }
 
 export namespace Containers {
+  export interface ContainersControllerListRes {
+    /**
+     * @example 200
+     */
+    code: number
+    /**
+     * @example success
+     */
+    message: string
+    data: __common__.PaginatedContainersResponseDto
+  }
+
+  export interface ContainersControllerListParams {
+    /**
+     * @description 页码（从 1 开始）
+     */
+    page?: number
+    /**
+     * @description 每页条数（最大 100）
+     */
+    pageSize?: number
+    /**
+     * @description 按容器状态过滤
+     */
+    status?: EnumLists.Status
+    /**
+     * @description 按 agentName 模糊匹配（大小写不敏感）
+     */
+    keyword?: string
+  }
+
   export interface ContainersCreateRes {
     /**
      * @example 200
@@ -1208,6 +1744,68 @@ export namespace Containers {
    * @description 容器创建参数
    */
   export interface ContainersCreateBody extends __common__.CreateContainerDto {}
+
+  export interface ContainersGetRes {
+    /**
+     * @example 200
+     */
+    code: number
+    /**
+     * @example success
+     */
+    message: string
+    data: __common__.ContainerDetailResponseDto
+  }
+
+  export interface ContainersGetParams {
+    /**
+     * @description 容器的唯一标识符 (UUID)
+     */
+    id: string
+  }
+
+  export interface ContainersControllerDeleteRes {
+    /**
+     * @example 200
+     */
+    code: number
+    /**
+     * @example success
+     */
+    message: string
+    data: __common__.ContainerIdResponseDto
+  }
+
+  export interface ContainersControllerDeleteParams {
+    /**
+     * @description 容器的唯一标识符 (UUID)
+     */
+    id: string
+  }
+
+  export interface ContainersControllerUpdateRes {
+    /**
+     * @example 200
+     */
+    code: number
+    /**
+     * @example success
+     */
+    message: string
+    data: __common__.ContainerEntity
+  }
+
+  export interface ContainersControllerUpdateParams {
+    /**
+     * @description 容器的唯一标识符 (UUID)
+     */
+    id: string
+  }
+
+  /**
+   * @description 需要修改的字段（仅非 undefined 字段生效）
+   */
+  export interface ContainersControllerUpdateBody extends __common__.UpdateContainerDto {}
 
   export interface ContainersStartRes {
     /**
@@ -1241,25 +1839,6 @@ export namespace Containers {
   }
 
   export interface ContainersStopParams {
-    /**
-     * @description 容器的唯一标识符 (UUID)
-     */
-    id: string
-  }
-
-  export interface ContainersGetRes {
-    /**
-     * @example 200
-     */
-    code: number
-    /**
-     * @example success
-     */
-    message: string
-    data: __common__.ContainerDetailResponseDto
-  }
-
-  export interface ContainersGetParams {
     /**
      * @description 容器的唯一标识符 (UUID)
      */
@@ -1313,6 +1892,17 @@ export namespace Containers {
   export type RContainersStop = Promise<[any, Containers.ContainersStopRes["data"], Containers.ContainersStopRes]>
   export type RContainersStart = Promise<[any, Containers.ContainersStartRes["data"], Containers.ContainersStartRes]>
   export type RContainersCreate = Promise<[any, Containers.ContainersCreateRes["data"], Containers.ContainersCreateRes]>
+  export type RContainersControllerList = Promise<
+    [any, Containers.ContainersControllerListRes["data"], Containers.ContainersControllerListRes]
+  >
+  export type RContainersControllerDelete = Promise<
+    [any, Containers.ContainersControllerDeleteRes["data"], Containers.ContainersControllerDeleteRes]
+  >
+  export type ContainersControllerUpdateParams1 = ContainersControllerUpdateParams & __common__.UpdateContainerDto
+
+  export type RContainersControllerUpdate = Promise<
+    [any, Containers.ContainersControllerUpdateRes["data"], Containers.ContainersControllerUpdateRes]
+  >
   export type ContainersCreateWorkspaceFolderParams1 = ContainersCreateWorkspaceFolderParams &
     __common__.CreateWorkspaceFolderDto
 
@@ -1713,6 +2303,138 @@ export namespace Heartbeat {
   export interface HeartbeatUpdateBody extends __common__.HeartbeatDto {}
 
   export type RHeartbeatUpdate = Promise<[any, Heartbeat.HeartbeatUpdateRes["data"], Heartbeat.HeartbeatUpdateRes]>
+}
+
+export namespace Projects {
+  export interface ProjectsControllerListRes {
+    /**
+     * @example 200
+     */
+    code: number
+    /**
+     * @example success
+     */
+    message: string
+    data: __common__.PaginatedProjectResponseDto
+  }
+
+  export interface ProjectsControllerListParams {
+    /**
+     * @description 页码，从 1 开始
+     */
+    page?: number
+    /**
+     * @description 每页数量，最大 500
+     */
+    pageSize?: number
+    /**
+     * @description 按容器 ID 过滤
+     */
+    containerId?: string
+    /**
+     * @description 按项目名称模糊匹配（大小写不敏感）
+     */
+    keyword?: string
+  }
+
+  export interface ProjectsControllerCreateRes {
+    /**
+     * @example 200
+     */
+    code: number
+    /**
+     * @example success
+     */
+    message: string
+    data: __common__.ProjectResponseDto
+  }
+
+  export interface ProjectsControllerCreateParams {}
+
+  /**
+   * @description 项目创建参数
+   */
+  export interface ProjectsControllerCreateBody extends __common__.CreateProjectDto {}
+
+  export interface ProjectsControllerDetailRes {
+    /**
+     * @example 200
+     */
+    code: number
+    /**
+     * @example success
+     */
+    message: string
+    data: __common__.ProjectDetailResponseDto
+  }
+
+  export interface ProjectsControllerDetailParams {
+    /**
+     * @description 项目 ID
+     */
+    id: string
+  }
+
+  export interface ProjectsControllerRemoveRes {
+    /**
+     * @example 200
+     */
+    code: number
+    /**
+     * @example success
+     */
+    message: string
+    data: { id?: string }
+  }
+
+  export interface ProjectsControllerRemoveParams {
+    /**
+     * @description 项目 ID
+     */
+    id: string
+  }
+
+  export interface ProjectsControllerUpdateRes {
+    /**
+     * @example 200
+     */
+    code: number
+    /**
+     * @example success
+     */
+    message: string
+    data: __common__.ProjectResponseDto
+  }
+
+  export interface ProjectsControllerUpdateParams {
+    /**
+     * @description 项目 ID
+     */
+    id: string
+  }
+
+  /**
+   * @description 项目更新参数
+   */
+  export interface ProjectsControllerUpdateBody extends __common__.UpdateProjectDto {}
+
+  export type RProjectsControllerList = Promise<
+    [any, Projects.ProjectsControllerListRes["data"], Projects.ProjectsControllerListRes]
+  >
+  export type RProjectsControllerCreate = Promise<
+    [any, Projects.ProjectsControllerCreateRes["data"], Projects.ProjectsControllerCreateRes]
+  >
+  export type RProjectsControllerDetail = Promise<
+    [any, Projects.ProjectsControllerDetailRes["data"], Projects.ProjectsControllerDetailRes]
+  >
+  export type RProjectsControllerRemove = Promise<
+    [any, Projects.ProjectsControllerRemoveRes["data"], Projects.ProjectsControllerRemoveRes]
+  >
+  export type ProjectsControllerUpdateParams1 = ProjectsControllerUpdateParams & __common__.UpdateProjectDto
+
+  export type RProjectsControllerUpdate = Promise<
+    [any, Projects.ProjectsControllerUpdateRes["data"], Projects.ProjectsControllerUpdateRes]
+  >
 }
 
 export namespace Logs {
@@ -2458,5 +3180,197 @@ export namespace Feedback {
   >
   export type RFeedbackControllerUploadFile = Promise<
     [any, Feedback.FeedbackControllerUploadFileRes["data"], Feedback.FeedbackControllerUploadFileRes]
+  >
+}
+
+export namespace SecondaryPath {
+  export interface SecondaryPathControllerForwardRootParams {}
+
+  export interface SecondaryPathControllerForwardRootPutParams {}
+
+  export interface SecondaryPathControllerForwardRootPostParams {}
+
+  export interface SecondaryPathControllerForwardRootDeleteParams {}
+
+  export interface SecondaryPathControllerForwardRootOptionsParams {}
+
+  export interface SecondaryPathControllerForwardRootHeadParams {}
+
+  export interface SecondaryPathControllerForwardRootPatchParams {}
+
+  export interface SecondaryPathControllerForwardWithParams {}
+
+  export interface SecondaryPathControllerForwardWithPutParams {}
+
+  export interface SecondaryPathControllerForwardWithPostParams {}
+
+  export interface SecondaryPathControllerForwardWithDeleteParams {}
+
+  export interface SecondaryPathControllerForwardWithOptionsParams {}
+
+  export interface SecondaryPathControllerForwardWithHeadParams {}
+
+  export interface SecondaryPathControllerForwardWithPatchParams {}
+}
+
+export namespace ContainerConfig {
+  export interface ContainerConfigControllerGetAgentsRes {
+    /**
+     * @example 200
+     */
+    code: number
+    /**
+     * @example success
+     */
+    message: string
+    data: __common__.AgentsMdResponseDto
+  }
+
+  export interface ContainerConfigControllerGetAgentsParams {
+    /**
+     * @description 容器 ID (UUID)
+     */
+    id: string
+  }
+
+  export interface ContainerConfigControllerWriteAgentsRes {
+    /**
+     * @example 200
+     */
+    code: number
+    /**
+     * @example success
+     */
+    message: string
+    data: __common__.AgentsMdResponseDto
+  }
+
+  export interface ContainerConfigControllerWriteAgentsParams {
+    /**
+     * @description 容器 ID (UUID)
+     */
+    id: string
+  }
+
+  /**
+   * @description AGENTS.md 内容（全量覆盖）
+   */
+  export interface ContainerConfigControllerWriteAgentsBody extends __common__.WriteAgentsMdDto {}
+
+  export interface ContainerConfigControllerGetFilesRes {
+    /**
+     * @example 200
+     */
+    code: number
+    /**
+     * @example success
+     */
+    message: string
+    data: Array<__common__.ConfigFileMetaDto>
+  }
+
+  export interface ContainerConfigControllerGetFilesParams {
+    /**
+     * @description 容器 ID (UUID)
+     */
+    id: string
+    /**
+     * @description 可选；传入则读取单个文件内容，不传则列出所有文件
+     */
+    fileName?: string
+  }
+
+  export interface ContainerConfigControllerWriteFileRes {
+    /**
+     * @example 200
+     */
+    code: number
+    /**
+     * @example success
+     */
+    message: string
+    data: __common__.ConfigFileContentDto
+  }
+
+  export interface ContainerConfigControllerWriteFileParams {
+    /**
+     * @description 容器 ID (UUID)
+     */
+    id: string
+  }
+
+  /**
+   * @description 文件写入参数
+   */
+  export interface ContainerConfigControllerWriteFileBody extends __common__.WriteConfigFileDto {}
+
+  export interface ContainerConfigControllerDeleteFileRes {
+    /**
+     * @example 200
+     */
+    code: number
+    /**
+     * @example success
+     */
+    message: string
+    data: {
+      /**
+       * @example custom.jsonc
+       */
+      name?: string
+    }
+  }
+
+  export interface ContainerConfigControllerDeleteFileParams {
+    /**
+     * @description 容器 ID (UUID)
+     */
+    id: string
+    /**
+     * @description 要删除的文件名
+     */
+    fileName: string
+  }
+
+  export type RContainerConfigControllerGetFiles = Promise<
+    [
+      any,
+      ContainerConfig.ContainerConfigControllerGetFilesRes["data"],
+      ContainerConfig.ContainerConfigControllerGetFilesRes,
+    ]
+  >
+  export type RContainerConfigControllerGetAgents = Promise<
+    [
+      any,
+      ContainerConfig.ContainerConfigControllerGetAgentsRes["data"],
+      ContainerConfig.ContainerConfigControllerGetAgentsRes,
+    ]
+  >
+  export type ContainerConfigControllerWriteFileParams1 = ContainerConfigControllerWriteFileParams &
+    __common__.WriteConfigFileDto
+
+  export type RContainerConfigControllerWriteFile = Promise<
+    [
+      any,
+      ContainerConfig.ContainerConfigControllerWriteFileRes["data"],
+      ContainerConfig.ContainerConfigControllerWriteFileRes,
+    ]
+  >
+  export type RContainerConfigControllerDeleteFile = Promise<
+    [
+      any,
+      ContainerConfig.ContainerConfigControllerDeleteFileRes["data"],
+      ContainerConfig.ContainerConfigControllerDeleteFileRes,
+    ]
+  >
+  export type ContainerConfigControllerWriteAgentsParams1 = ContainerConfigControllerWriteAgentsParams &
+    __common__.WriteAgentsMdDto
+
+  export type RContainerConfigControllerWriteAgents = Promise<
+    [
+      any,
+      ContainerConfig.ContainerConfigControllerWriteAgentsRes["data"],
+      ContainerConfig.ContainerConfigControllerWriteAgentsRes,
+    ]
   >
 }
