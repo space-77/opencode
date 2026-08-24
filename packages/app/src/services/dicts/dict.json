@@ -88,7 +88,10 @@
       "put_/containers/{id}/config/agents-md": "ContainerConfigController_writeAgentsMd",
       "get_/containers/{id}/config/files": "ContainerConfigController_getFiles",
       "put_/containers/{id}/config/files": "ContainerConfigController_writeConfigFile",
-      "delete_/containers/{id}/config/files": "ContainerConfigController_deleteConfigFile"
+      "delete_/containers/{id}/config/files": "ContainerConfigController_deleteConfigFile",
+      "post_/containers/{id}/restart": "ContainersController_restart",
+      "post_/containers/{id}/system/hot-reload": "ContainersController_hotReload",
+      "post_/containers/{id}/workspace/folders/create": "WorkspaceFolderController_createFolder"
     },
     "returnTypeNames": {},
     "requestTypeNames": {},

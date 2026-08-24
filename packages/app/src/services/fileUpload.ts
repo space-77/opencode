@@ -98,6 +98,17 @@ export default class FileUpload extends ApiClient {
   }
 
   /**
+   * @summary 在工作区内按多级路径递归创建文件夹
+   * @description 在容器工作区内按相对路径创建文件夹，缺失的中间层级自动递归创建（mkdir -p 语义）。目标文件夹已存在时幂等成功，返回创建后的完整路径。与 POST /containers/:id/workspace/folders（分配会话工作区，单层目录）语义不同。
+   */
+  workspaceFolderControllerCreate(params: types.WorkspaceFolderControllerCreateParams1) {
+    const { id, ...body } = params
+    const url = `/containers/${id}/workspace/folders/create`
+    const config: DocReqConfig = { url, body, method: "post" }
+    return this.request<types.RWorkspaceFolderControllerCreate>(config)
+  }
+
+  /**
    * @summary 签发文件下载（及可选保存回调）短时 token URL
    * @description 校验文件可下载后，返回带短时签名 token 的相对 URL（前端按 BASE_URL 拼接）。mode=edit 时额外返回保存回调 URL，供 ONLYOFFICE 在线编辑写回文件。
    */

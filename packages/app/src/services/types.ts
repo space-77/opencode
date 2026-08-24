@@ -30,6 +30,7 @@ export namespace EnumLists {
     "start" = "start",
     "stop" = "stop",
     "delete" = "delete",
+    "restart" = "restart",
   }
   export enum OperationResult {
     "success" = "success",
@@ -78,6 +79,16 @@ export namespace __common__ {
      * @description 用户 ID
      */
     userId: string
+    /**
+     * @example 张三
+     * @description 用户名称
+     */
+    userName: string
+    /**
+     * @example nick
+     * @description 用户昵称
+     */
+    nickName: string
     /**
      * @example abc123def456
      * @description Docker 容器 ID
@@ -266,6 +277,16 @@ export namespace __common__ {
        * @description 用户 ID
        */
       userId: string
+      /**
+       * @example 张三
+       * @description 用户名称
+       */
+      userName: string
+      /**
+       * @example nick
+       * @description 用户昵称
+       */
+      nickName: string
       /**
        * @example abc123def456
        * @description Docker 容器 ID
@@ -487,26 +508,7 @@ export namespace __common__ {
     id: string
   }
 
-  export interface HeartbeatDto {
-    /**
-     * @example 123e4567-e89b-12d3-a456-426614174000
-     * @description Agent 的唯一标识符 (UUID)
-     */
-    agentId: string
-    /**
-     * @example 5
-     * @description 等待时间（秒），用于长轮询
-     */
-    waitTime?: number
-  }
-
-  export interface HeartbeatResponseDto {
-    /**
-     * @example 2024-01-15T10:30:00.000Z
-     * @description 更新后的心跳时间
-     */
-    heartbeatAt: string
-  }
+  export interface Object {}
 
   export interface ProjectResponseDto {
     /**
@@ -816,6 +818,27 @@ export namespace __common__ {
      * @description 每页数量
      */
     pageSize: number
+  }
+
+  export interface HeartbeatDto {
+    /**
+     * @example 123e4567-e89b-12d3-a456-426614174000
+     * @description Agent 的唯一标识符 (UUID)
+     */
+    agentId: string
+    /**
+     * @example 5
+     * @description 等待时间（秒），用于长轮询
+     */
+    waitTime?: number
+  }
+
+  export interface HeartbeatResponseDto {
+    /**
+     * @example 2024-01-15T10:30:00.000Z
+     * @description 更新后的心跳时间
+     */
+    heartbeatAt: string
   }
 
   export interface ContainerLogsQueryDto {
@@ -1298,6 +1321,22 @@ export namespace __common__ {
     path: string
   }
 
+  export interface CreateFolderDto {
+    /**
+     * @example default/a/b/c
+     * @description 要创建的文件夹路径，相对于 /workspace。路径中不存在的层级会自动递归创建；已存在时幂等成功。支持传入 /workspace 或其子路径
+     */
+    folderPath: string
+  }
+
+  export interface CreateFolderResponseDto {
+    /**
+     * @example /workspace/default/a/b/c
+     * @description 创建后的文件夹在工作区内的完整路径（以 /workspace 开头）
+     */
+    path: string
+  }
+
   export interface CreateFileDto {
     /**
      * @example /workspace/default/project/note.md
@@ -1461,6 +1500,16 @@ export namespace __common__ {
      */
     userId: string
     /**
+     * @example 张三
+     * @description 用户名称
+     */
+    userName: string
+    /**
+     * @example nick
+     * @description 用户昵称
+     */
+    nickName: string
+    /**
      * @example positive
      * @description 反馈类型
      */
@@ -1496,6 +1545,16 @@ export namespace __common__ {
      * @description 用户 ID
      */
     userId: string
+    /**
+     * @example 张三
+     * @description 用户名称
+     */
+    userName: string
+    /**
+     * @example nick
+     * @description 用户昵称
+     */
+    nickName: string
     /**
      * @example positive
      * @description 反馈类型
@@ -1845,6 +1904,46 @@ export namespace Containers {
     id: string
   }
 
+  export interface ContainersControllerRestartRes {
+    /**
+     * @example 200
+     */
+    code: number
+    /**
+     * @example success
+     */
+    message: string
+    data: Object
+  }
+
+  export interface ContainersControllerRestartParams {
+    /**
+     * @description 容器的唯一标识符 (UUID)
+     */
+    id: string
+    authorization: string
+  }
+
+  export interface ContainersControllerHotReloadRes {
+    /**
+     * @example 200
+     */
+    code: number
+    /**
+     * @example success
+     */
+    message: string
+    data: Object
+  }
+
+  export interface ContainersControllerHotReloadParams {
+    /**
+     * @description 容器的唯一标识符 (UUID)
+     */
+    id: string
+    authorization: string
+  }
+
   export interface ContainersCreateWorkspaceFolderRes {
     /**
      * @example 200
@@ -1903,6 +2002,12 @@ export namespace Containers {
   export type RContainersControllerUpdate = Promise<
     [any, Containers.ContainersControllerUpdateRes["data"], Containers.ContainersControllerUpdateRes]
   >
+  export type RContainersControllerRestart = Promise<
+    [any, Containers.ContainersControllerRestartRes["data"], Containers.ContainersControllerRestartRes]
+  >
+  export type RContainersControllerHotReload = Promise<
+    [any, Containers.ContainersControllerHotReloadRes["data"], Containers.ContainersControllerHotReloadRes]
+  >
   export type ContainersCreateWorkspaceFolderParams1 = ContainersCreateWorkspaceFolderParams &
     __common__.CreateWorkspaceFolderDto
 
@@ -1911,6 +2016,138 @@ export namespace Containers {
   >
   export type RContainersGetAvailableWorkspace = Promise<
     [any, Containers.ContainersGetAvailableWorkspaceRes["data"], Containers.ContainersGetAvailableWorkspaceRes]
+  >
+}
+
+export namespace Projects {
+  export interface ProjectsControllerListRes {
+    /**
+     * @example 200
+     */
+    code: number
+    /**
+     * @example success
+     */
+    message: string
+    data: __common__.PaginatedProjectResponseDto
+  }
+
+  export interface ProjectsControllerListParams {
+    /**
+     * @description 页码，从 1 开始
+     */
+    page?: number
+    /**
+     * @description 每页数量，最大 500
+     */
+    pageSize?: number
+    /**
+     * @description 按容器 ID 过滤
+     */
+    containerId?: string
+    /**
+     * @description 按项目名称模糊匹配（大小写不敏感）
+     */
+    keyword?: string
+  }
+
+  export interface ProjectsControllerCreateRes {
+    /**
+     * @example 200
+     */
+    code: number
+    /**
+     * @example success
+     */
+    message: string
+    data: __common__.ProjectResponseDto
+  }
+
+  export interface ProjectsControllerCreateParams {}
+
+  /**
+   * @description 项目创建参数
+   */
+  export interface ProjectsControllerCreateBody extends __common__.CreateProjectDto {}
+
+  export interface ProjectsControllerDetailRes {
+    /**
+     * @example 200
+     */
+    code: number
+    /**
+     * @example success
+     */
+    message: string
+    data: __common__.ProjectDetailResponseDto
+  }
+
+  export interface ProjectsControllerDetailParams {
+    /**
+     * @description 项目 ID
+     */
+    id: string
+  }
+
+  export interface ProjectsControllerRemoveRes {
+    /**
+     * @example 200
+     */
+    code: number
+    /**
+     * @example success
+     */
+    message: string
+    data: { id?: string }
+  }
+
+  export interface ProjectsControllerRemoveParams {
+    /**
+     * @description 项目 ID
+     */
+    id: string
+  }
+
+  export interface ProjectsControllerUpdateRes {
+    /**
+     * @example 200
+     */
+    code: number
+    /**
+     * @example success
+     */
+    message: string
+    data: __common__.ProjectResponseDto
+  }
+
+  export interface ProjectsControllerUpdateParams {
+    /**
+     * @description 项目 ID
+     */
+    id: string
+  }
+
+  /**
+   * @description 项目更新参数
+   */
+  export interface ProjectsControllerUpdateBody extends __common__.UpdateProjectDto {}
+
+  export type RProjectsControllerList = Promise<
+    [any, Projects.ProjectsControllerListRes["data"], Projects.ProjectsControllerListRes]
+  >
+  export type RProjectsControllerCreate = Promise<
+    [any, Projects.ProjectsControllerCreateRes["data"], Projects.ProjectsControllerCreateRes]
+  >
+  export type RProjectsControllerDetail = Promise<
+    [any, Projects.ProjectsControllerDetailRes["data"], Projects.ProjectsControllerDetailRes]
+  >
+  export type RProjectsControllerRemove = Promise<
+    [any, Projects.ProjectsControllerRemoveRes["data"], Projects.ProjectsControllerRemoveRes]
+  >
+  export type ProjectsControllerUpdateParams1 = ProjectsControllerUpdateParams & __common__.UpdateProjectDto
+
+  export type RProjectsControllerUpdate = Promise<
+    [any, Projects.ProjectsControllerUpdateRes["data"], Projects.ProjectsControllerUpdateRes]
   >
 }
 
@@ -2303,138 +2540,6 @@ export namespace Heartbeat {
   export interface HeartbeatUpdateBody extends __common__.HeartbeatDto {}
 
   export type RHeartbeatUpdate = Promise<[any, Heartbeat.HeartbeatUpdateRes["data"], Heartbeat.HeartbeatUpdateRes]>
-}
-
-export namespace Projects {
-  export interface ProjectsControllerListRes {
-    /**
-     * @example 200
-     */
-    code: number
-    /**
-     * @example success
-     */
-    message: string
-    data: __common__.PaginatedProjectResponseDto
-  }
-
-  export interface ProjectsControllerListParams {
-    /**
-     * @description 页码，从 1 开始
-     */
-    page?: number
-    /**
-     * @description 每页数量，最大 500
-     */
-    pageSize?: number
-    /**
-     * @description 按容器 ID 过滤
-     */
-    containerId?: string
-    /**
-     * @description 按项目名称模糊匹配（大小写不敏感）
-     */
-    keyword?: string
-  }
-
-  export interface ProjectsControllerCreateRes {
-    /**
-     * @example 200
-     */
-    code: number
-    /**
-     * @example success
-     */
-    message: string
-    data: __common__.ProjectResponseDto
-  }
-
-  export interface ProjectsControllerCreateParams {}
-
-  /**
-   * @description 项目创建参数
-   */
-  export interface ProjectsControllerCreateBody extends __common__.CreateProjectDto {}
-
-  export interface ProjectsControllerDetailRes {
-    /**
-     * @example 200
-     */
-    code: number
-    /**
-     * @example success
-     */
-    message: string
-    data: __common__.ProjectDetailResponseDto
-  }
-
-  export interface ProjectsControllerDetailParams {
-    /**
-     * @description 项目 ID
-     */
-    id: string
-  }
-
-  export interface ProjectsControllerRemoveRes {
-    /**
-     * @example 200
-     */
-    code: number
-    /**
-     * @example success
-     */
-    message: string
-    data: { id?: string }
-  }
-
-  export interface ProjectsControllerRemoveParams {
-    /**
-     * @description 项目 ID
-     */
-    id: string
-  }
-
-  export interface ProjectsControllerUpdateRes {
-    /**
-     * @example 200
-     */
-    code: number
-    /**
-     * @example success
-     */
-    message: string
-    data: __common__.ProjectResponseDto
-  }
-
-  export interface ProjectsControllerUpdateParams {
-    /**
-     * @description 项目 ID
-     */
-    id: string
-  }
-
-  /**
-   * @description 项目更新参数
-   */
-  export interface ProjectsControllerUpdateBody extends __common__.UpdateProjectDto {}
-
-  export type RProjectsControllerList = Promise<
-    [any, Projects.ProjectsControllerListRes["data"], Projects.ProjectsControllerListRes]
-  >
-  export type RProjectsControllerCreate = Promise<
-    [any, Projects.ProjectsControllerCreateRes["data"], Projects.ProjectsControllerCreateRes]
-  >
-  export type RProjectsControllerDetail = Promise<
-    [any, Projects.ProjectsControllerDetailRes["data"], Projects.ProjectsControllerDetailRes]
-  >
-  export type RProjectsControllerRemove = Promise<
-    [any, Projects.ProjectsControllerRemoveRes["data"], Projects.ProjectsControllerRemoveRes]
-  >
-  export type ProjectsControllerUpdateParams1 = ProjectsControllerUpdateParams & __common__.UpdateProjectDto
-
-  export type RProjectsControllerUpdate = Promise<
-    [any, Projects.ProjectsControllerUpdateRes["data"], Projects.ProjectsControllerUpdateRes]
-  >
 }
 
 export namespace Logs {
@@ -2840,6 +2945,30 @@ export namespace FileUpload {
 
   export interface FileUploadControllerOnlyOfficeBody extends __common__.OnlyOfficeCallbackDto {}
 
+  export interface WorkspaceFolderControllerCreateRes {
+    /**
+     * @example 200
+     */
+    code: number
+    /**
+     * @example success
+     */
+    message: string
+    data: __common__.CreateFolderResponseDto
+  }
+
+  export interface WorkspaceFolderControllerCreateParams {
+    /**
+     * @description 容器的唯一标识符 (UUID)
+     */
+    id: string
+  }
+
+  /**
+   * @description 要创建的文件夹路径（相对 /workspace）
+   */
+  export interface WorkspaceFolderControllerCreateBody extends __common__.CreateFolderDto {}
+
   export type FileUploadParams1 = FileUploadParams & FileUploadBody
 
   export type RFileUpload = Promise<[any, FileUpload.FileUploadRes["data"], FileUpload.FileUploadRes]>
@@ -2859,6 +2988,12 @@ export namespace FileUpload {
 
   export type RFileUploadControllerOnlyOffice = Promise<
     [any, FileUpload.FileUploadControllerOnlyOfficeRes["data"], FileUpload.FileUploadControllerOnlyOfficeRes]
+  >
+  export type WorkspaceFolderControllerCreateParams1 = WorkspaceFolderControllerCreateParams &
+    __common__.CreateFolderDto
+
+  export type RWorkspaceFolderControllerCreate = Promise<
+    [any, FileUpload.WorkspaceFolderControllerCreateRes["data"], FileUpload.WorkspaceFolderControllerCreateRes]
   >
   export type FileUploadControllerIssueDownloadParams1 = FileUploadControllerIssueDownloadParams &
     __common__.DownloadTokenDto
@@ -2940,6 +3075,10 @@ export namespace WorkspaceFile {
      * @description 要删除的文件路径，必须以 /workspace 开头
      */
     filePath: string
+    /**
+     * @description 是否递归删除目录及其全部内容，默认 false（目录返回 400）
+     */
+    recursive?: boolean
   }
 
   export interface WorkspaceFileControllerUpdateRes {

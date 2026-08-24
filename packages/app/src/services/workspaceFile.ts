@@ -39,7 +39,7 @@ export default class WorkspaceFile extends ApiClient {
 
   /**
    * @summary 删除工作区文件
-   * @description 删除容器工作区（映射到宿主机 userData/{userId}/workspace）中的指定文件。
+   * @description 删除容器工作区（映射到宿主机 userData/{userId}/workspace）中的指定文件。recursive=true 时允许删除目录并递归删除其全部内容；缺省时目录返回 400。
    */
   workspaceFileControllerDelete(params: types.WorkspaceFileControllerDeleteParams) {
     const { id, ...query } = params

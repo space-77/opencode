@@ -88,6 +88,28 @@ export default class Containers extends ApiClient {
   }
 
   /**
+   * @summary 重启容器（容器内 Agent 自重启）
+   * @description 仅要求 Authorization: Bearer <token>（无需 indicatorUserId 头）。受理后先通知前端打开全局 loading，延迟 2 秒再重启容器；重启完成后通知前端恢复。接口立即返回，不等待重启完成
+   */
+  containersControllerRestart(params: types.ContainersControllerRestartParams) {
+    const { id, ...headers } = params
+    const url = `/containers/${id}/restart`
+    const config: DocReqConfig = { url, headers, method: "post" }
+    return this.request<types.RContainersControllerRestart>(config)
+  }
+
+  /**
+   * @summary 热重载容器配置
+   * @description 仅要求 Authorization: Bearer <token>（无需 indicatorUserId 头）。直接转发到容器内 POST /system/hot-reload，不延迟、不重启容器；容器内 server 负责发布 hot_reload/hot_reload_complete/hot_reload_failed 事件通知前端
+   */
+  containersControllerHotReload(params: types.ContainersControllerHotReloadParams) {
+    const { id, ...headers } = params
+    const url = `/containers/${id}/system/hot-reload`
+    const config: DocReqConfig = { url, headers, method: "post" }
+    return this.request<types.RContainersControllerHotReload>(config)
+  }
+
+  /**
    * @summary 创建工作区文件夹
    * @description 在容器 /workspace 目录下创建子文件夹；未指定 folderName 时使用 UUID 命名
    */
