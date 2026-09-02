@@ -48,6 +48,48 @@ export namespace EnumLists {
     "positive" = "positive",
     "negative" = "negative",
   }
+  export enum Type1 {
+    "npm" = "npm",
+    "pip" = "pip",
+    "linux" = "linux",
+  }
+  export enum Source {
+    "human" = "human",
+    "agent" = "agent",
+  }
+  export enum Type2 {
+    "npm" = "npm",
+    "pip" = "pip",
+    "linux" = "linux",
+  }
+  export enum Type3 {
+    "npm" = "npm",
+    "pip" = "pip",
+    "linux" = "linux",
+  }
+  export enum SortBy {
+    "hitCount" = "hitCount",
+    "createdAt" = "createdAt",
+  }
+  export enum SortOrder {
+    "asc" = "asc",
+    "desc" = "desc",
+  }
+  export enum Type4 {
+    "npm" = "npm",
+    "pip" = "pip",
+    "linux" = "linux",
+  }
+  export enum Type5 {
+    "npm" = "npm",
+    "pip" = "pip",
+    "linux" = "linux",
+  }
+  export enum Type6 {
+    "npm" = "npm",
+    "pip" = "pip",
+    "linux" = "linux",
+  }
 }
 
 export namespace __common__ {
@@ -1696,6 +1738,263 @@ You are an opencode agent...
      * @description 是否校验 JSON/JSONC 合法性（仅对 .json / .jsonc 文件生效），默认 true
      */
     validateJsonc?: boolean
+  }
+
+  export interface CreateDependencyRequestDto {
+    /**
+     * @example pip
+     * @description 依赖类型：npm / pip / linux
+     */
+    type: EnumLists.Type1
+    /**
+     * @example pandas
+     * @description 依赖包名称
+     */
+    name: string
+    /**
+     * @example 2.2.0
+     * @description 依赖版本；留空表示不限版本
+     */
+    version?: string
+    /**
+     * @example human
+     * @description 来源类型：human（人工登记，默认）/ agent（容器内 opencode 上报）
+     */
+    source?: EnumLists.Source
+    /**
+     * @example pip install 失败：内网镜像源无此包
+     * @description 提交说明
+     */
+    remark?: string
+  }
+
+  export interface UpdateDependencyRequestDto {
+    /**
+     * @example pip
+     * @description 依赖类型：npm / pip / linux
+     */
+    type?: EnumLists.Type2
+    /**
+     * @example pandas
+     * @description 依赖包名称
+     */
+    name?: string
+    /**
+     * @example 2.2.0
+     * @description 依赖版本；传空串表示清除版本约束
+     */
+    version?: string | null
+    /**
+     * @example 更新说明
+     * @description 提交说明；传 null 表示清除说明
+     */
+    remark?: string | null
+  }
+
+  export interface CollectDependencyRequestDto {
+    /**
+     * @example true
+     * @description 是否已收集：true 写入 collected_at 为当前时间，false 清空 collected_at
+     */
+    collected: boolean
+  }
+
+  export interface QueryDependencyRequestsDto {
+    /**
+     * @example 1
+     * @description 页码，从 1 开始
+     */
+    page?: number
+    /**
+     * @example 10
+     * @description 每页数量，上限 100
+     */
+    pageSize?: number
+    /**
+     * @example pip
+     * @description 依赖类型过滤：npm / pip / linux
+     */
+    type?: EnumLists.Type3
+    /**
+     * @example agent
+     * @description 来源类型过滤：human / agent
+     */
+    source?: EnumLists.Source
+    /**
+     * @description 收集状态过滤：true / false
+     */
+    collected?: boolean
+    /**
+     * @example pan
+     * @description 包名称关键词模糊匹配
+     */
+    keyword?: string
+    /**
+     * @example hitCount
+     * @description 排序字段：hitCount（命中次数）/ createdAt（提交时间）
+     */
+    sortBy?: EnumLists.SortBy
+    /**
+     * @example desc
+     * @description 排序方向：asc / desc，默认 desc
+     */
+    sortOrder?: EnumLists.SortOrder
+  }
+
+  export interface DependencyRequestResponseDto {
+    /**
+     * @description 依赖需求唯一标识符 (UUID)
+     */
+    id: string
+    /**
+     * @example pip
+     * @description 依赖类型
+     */
+    type: EnumLists.Type4
+    /**
+     * @example pandas
+     * @description 依赖包名称
+     */
+    name: string
+    /**
+     * @example 2.2.0
+     * @description 依赖版本
+     */
+    version: string | null
+    /**
+     * @example agent
+     * @description 来源类型
+     */
+    source: EnumLists.Source
+    /**
+     * @example user123
+     * @description 提交人用户 ID
+     */
+    userId: string
+    /**
+     * @example 张三
+     * @description 提交人名称
+     */
+    userName: string
+    /**
+     * @example nick
+     * @description 提交人昵称
+     */
+    nickName: string
+    /**
+     * @description 提交说明
+     */
+    remark: string | null
+    /**
+     * @example 3
+     * @description 上报命中次数
+     */
+    hitCount: number
+    /**
+     * @description 是否已收集
+     */
+    collected: boolean
+    /**
+     * @description 收集时间
+     */
+    collectedAt: string | null
+    /**
+     * @description 创建时间
+     */
+    createdAt: string
+    /**
+     * @description 更新时间
+     */
+    updatedAt: string
+  }
+
+  export interface DependencyRequestListItemDto {
+    /**
+     * @description 依赖需求唯一标识符 (UUID)
+     */
+    id: string
+    /**
+     * @example pip
+     * @description 依赖类型
+     */
+    type: EnumLists.Type5
+    /**
+     * @example pandas
+     * @description 依赖包名称
+     */
+    name: string
+    /**
+     * @example 2.2.0
+     * @description 依赖版本
+     */
+    version: string | null
+    /**
+     * @example agent
+     * @description 来源类型
+     */
+    source: EnumLists.Source
+    /**
+     * @example user123
+     * @description 提交人用户 ID
+     */
+    userId: string
+    /**
+     * @example 张三
+     * @description 提交人名称
+     */
+    userName: string
+    /**
+     * @example nick
+     * @description 提交人昵称
+     */
+    nickName: string
+    /**
+     * @description 提交说明
+     */
+    remark: string | null
+    /**
+     * @example 3
+     * @description 上报命中次数
+     */
+    hitCount: number
+    /**
+     * @description 是否已收集
+     */
+    collected: boolean
+    /**
+     * @description 收集时间
+     */
+    collectedAt: string | null
+    /**
+     * @description 创建时间
+     */
+    createdAt: string
+    /**
+     * @description 更新时间
+     */
+    updatedAt: string
+  }
+
+  export interface PaginatedDependencyRequestListItemDto {
+    /**
+     * @description 数据列表
+     */
+    items: Array<__common__.DependencyRequestListItemDto>
+    /**
+     * @example 100
+     * @description 总记录数
+     */
+    total: number
+    /**
+     * @example 1
+     * @description 当前页码
+     */
+    page: number
+    /**
+     * @example 20
+     * @description 每页数量
+     */
+    pageSize: number
   }
 
   export interface LogsT {
@@ -3510,6 +3809,205 @@ export namespace ContainerConfig {
       any,
       ContainerConfig.ContainerConfigControllerWriteAgentsRes["data"],
       ContainerConfig.ContainerConfigControllerWriteAgentsRes,
+    ]
+  >
+}
+
+export namespace DependencyRequests {
+  export interface DependencyRequestControllerFindManyRes {
+    /**
+     * @example 200
+     */
+    code: number
+    /**
+     * @example success
+     */
+    message: string
+    data: __common__.PaginatedDependencyRequestListItemDto
+  }
+
+  export interface DependencyRequestControllerFindManyParams {
+    /**
+     * @description 页码，从 1 开始
+     */
+    page?: number
+    /**
+     * @description 每页数量，上限 100
+     */
+    pageSize?: number
+    /**
+     * @description 依赖类型过滤：npm / pip / linux
+     */
+    type?: EnumLists.Type6
+    /**
+     * @description 来源类型过滤：human / agent
+     */
+    source?: EnumLists.Source
+    /**
+     * @description 收集状态过滤：true / false
+     */
+    collected?: boolean
+    /**
+     * @description 包名称关键词模糊匹配
+     */
+    keyword?: string
+    /**
+     * @description 排序字段：hitCount（命中次数）/ createdAt（提交时间）
+     */
+    sortBy?: EnumLists.SortBy
+    /**
+     * @description 排序方向：asc / desc，默认 desc
+     */
+    sortOrder?: EnumLists.SortOrder
+  }
+
+  export interface DependencyRequestControllerCreateRes {
+    /**
+     * @example 200
+     */
+    code: number
+    /**
+     * @example success
+     */
+    message: string
+    data: __common__.DependencyRequestResponseDto
+  }
+
+  export interface DependencyRequestControllerCreateParams {
+    authorization: string
+  }
+
+  export interface DependencyRequestControllerCreateBody extends __common__.CreateDependencyRequestDto {}
+
+  export interface DependencyRequestControllerFindOneRes {
+    /**
+     * @example 200
+     */
+    code: number
+    /**
+     * @example success
+     */
+    message: string
+    data: __common__.DependencyRequestResponseDto
+  }
+
+  export interface DependencyRequestControllerFindOneParams {
+    /**
+     * @description 依赖需求 ID (UUID)
+     */
+    id: string
+  }
+
+  export interface DependencyRequestControllerUpdateRes {
+    /**
+     * @example 200
+     */
+    code: number
+    /**
+     * @example success
+     */
+    message: string
+    data: __common__.DependencyRequestResponseDto
+  }
+
+  export interface DependencyRequestControllerUpdateParams {
+    /**
+     * @description 依赖需求 ID (UUID)
+     */
+    id: string
+  }
+
+  export interface DependencyRequestControllerUpdateBody extends __common__.UpdateDependencyRequestDto {}
+
+  export interface DependencyRequestControllerRemoveRes {
+    /**
+     * @example 200
+     */
+    code: number
+    /**
+     * @example success
+     */
+    message: string
+    data: { id?: string }
+  }
+
+  export interface DependencyRequestControllerRemoveParams {
+    /**
+     * @description 依赖需求 ID (UUID)
+     */
+    id: string
+  }
+
+  export interface DependencyRequestControllerMarkCollectedRes {
+    /**
+     * @example 200
+     */
+    code: number
+    /**
+     * @example success
+     */
+    message: string
+    data: __common__.DependencyRequestResponseDto
+  }
+
+  export interface DependencyRequestControllerMarkCollectedParams {
+    /**
+     * @description 依赖需求 ID (UUID)
+     */
+    id: string
+  }
+
+  export interface DependencyRequestControllerMarkCollectedBody extends __common__.CollectDependencyRequestDto {}
+
+  export type DependencyRequestControllerCreateParams1 = DependencyRequestControllerCreateParams &
+    __common__.CreateDependencyRequestDto
+
+  export type RDependencyRequestControllerCreate = Promise<
+    [
+      any,
+      DependencyRequests.DependencyRequestControllerCreateRes["data"],
+      DependencyRequests.DependencyRequestControllerCreateRes,
+    ]
+  >
+  export type DependencyRequestControllerUpdateParams1 = DependencyRequestControllerUpdateParams &
+    __common__.UpdateDependencyRequestDto
+
+  export type RDependencyRequestControllerUpdate = Promise<
+    [
+      any,
+      DependencyRequests.DependencyRequestControllerUpdateRes["data"],
+      DependencyRequests.DependencyRequestControllerUpdateRes,
+    ]
+  >
+  export type RDependencyRequestControllerRemove = Promise<
+    [
+      any,
+      DependencyRequests.DependencyRequestControllerRemoveRes["data"],
+      DependencyRequests.DependencyRequestControllerRemoveRes,
+    ]
+  >
+  export type RDependencyRequestControllerFindOne = Promise<
+    [
+      any,
+      DependencyRequests.DependencyRequestControllerFindOneRes["data"],
+      DependencyRequests.DependencyRequestControllerFindOneRes,
+    ]
+  >
+  export type RDependencyRequestControllerFindMany = Promise<
+    [
+      any,
+      DependencyRequests.DependencyRequestControllerFindManyRes["data"],
+      DependencyRequests.DependencyRequestControllerFindManyRes,
+    ]
+  >
+  export type DependencyRequestControllerMarkCollectedParams1 = DependencyRequestControllerMarkCollectedParams &
+    __common__.CollectDependencyRequestDto
+
+  export type RDependencyRequestControllerMarkCollected = Promise<
+    [
+      any,
+      DependencyRequests.DependencyRequestControllerMarkCollectedRes["data"],
+      DependencyRequests.DependencyRequestControllerMarkCollectedRes,
     ]
   >
 }

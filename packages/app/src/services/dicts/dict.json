@@ -91,7 +91,13 @@
       "delete_/containers/{id}/config/files": "ContainerConfigController_deleteConfigFile",
       "post_/containers/{id}/restart": "ContainersController_restart",
       "post_/containers/{id}/system/hot-reload": "ContainersController_hotReload",
-      "post_/containers/{id}/workspace/folders/create": "WorkspaceFolderController_createFolder"
+      "post_/containers/{id}/workspace/folders/create": "WorkspaceFolderController_createFolder",
+      "post_/dependency-requests": "DependencyRequestController_create",
+      "get_/dependency-requests": "DependencyRequestController_findMany",
+      "get_/dependency-requests/{id}": "DependencyRequestController_findOne",
+      "put_/dependency-requests/{id}": "DependencyRequestController_update",
+      "delete_/dependency-requests/{id}": "DependencyRequestController_remove",
+      "patch_/dependency-requests/{id}/collect": "DependencyRequestController_markCollected"
     },
     "returnTypeNames": {},
     "requestTypeNames": {},
