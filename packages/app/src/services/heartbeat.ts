@@ -16,8 +16,9 @@ import type { Heartbeat as types, __common__ } from "./types"
  */
 export default class Heartbeat extends ApiClient {
   /**
-   * @summary 更新容器心跳
-   * @description Agent 客户端定期调用此接口更新心跳状态，支持长轮询等待任务
+   * @summary 更新容器心跳（已废弃）
+   * @description Agent 客户端定期调用此接口更新心跳状态，支持长轮询等待任务。已废弃：心跳改由代理层拦截 `/agent-proxy/{agentId}/api/health` 更新，该端点暂保留以兼容可能的存量客户端，确认无流量后可移除。
+   * @deprecated
    */
   heartbeatUpdate(body: __common__.HeartbeatDto) {
     const config: DocReqConfig = { url: "/heartbeat", body, method: "post" }

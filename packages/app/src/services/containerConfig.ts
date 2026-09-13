@@ -17,7 +17,7 @@ import type { ContainerConfig as types } from "./types"
 export default class ContainerConfig extends ApiClient {
   /**
    * @summary 列出配置文件 / 读取单个配置文件内容
-   * @description 不传 fileName 时列出 config 目录下所有直接子文件的元数据（不递归子目录）。传 fileName 时返回该文件内容；对 userinfo.jsonc/json 中的 access_token 字段自动脱敏为 ***。文件不存在时，列表场景会自动创建空目录后返回 []；读取场景返回 404。
+   * @description 不传 fileName 时列出 config 目录下所有直接子文件的元数据（不递归子目录）。传 fileName 时返回该文件内容；对 userinfo.jsonc/json 中的 access_token 字段自动脱敏为 ***。文件不存在时，列表场景会自动创建空目录后返回 []；读取场景返回 404。容器归属者本人或管理员（isAdmin）可访问；操作的目录恒为容器归属者 userId 的 config 目录。
    */
   containerConfigControllerGetFiles(params: types.ContainerConfigControllerGetFilesParams) {
     const { id, ...query } = params
@@ -29,7 +29,7 @@ export default class ContainerConfig extends ApiClient {
   /**
    * @param { String } id 容器 ID (UUID)
    * @summary 读取 AGENTS.md 提示词文件
-   * @description 读取容器对应宿主机 userData/{userId}/config/AGENTS.md 内容。文件不存在时返回空内容（content="", size=0, lastModified=null），不返回 404。
+   * @description 读取容器对应宿主机 userData/{userId}/config/AGENTS.md 内容。文件不存在时返回空内容（content="", size=0, lastModified=null），不返回 404。容器归属者本人或管理员（isAdmin）可读；管理员读取的仍是容器归属者 userId 目录下的文件。
    */
   containerConfigControllerGetAgents(id: string) {
     const url = `/containers/${id}/config/agents-md`
@@ -39,7 +39,7 @@ export default class ContainerConfig extends ApiClient {
 
   /**
    * @summary 写入单个配置文件
-   * @description 写入 userData/{userId}/config/{fileName}。文件已存在且 overwrite=false 时返回 409。对 userinfo.jsonc/json：若新 content 中 access_token 为 *** 或未包含该字段，则保留原真实 token（合并）；否则视为用户明确更新 token，原样写入。validateJsonc 默认 true，对 .json/.jsonc 文件做合法性校验。
+   * @description 写入 userData/{userId}/config/{fileName}。文件已存在且 overwrite=false 时返回 409。对 userinfo.jsonc/json：若新 content 中 access_token 为 *** 或未包含该字段，则保留原真实 token（合并）；否则视为用户明确更新 token，原样写入（管理员因此可覆盖他人 token，属有意放开的运维能力）。validateJsonc 默认 true，对 .json/.jsonc 文件做合法性校验。容器归属者本人或管理员（isAdmin）可写；写入目录恒为容器归属者 userId 的 config 目录，写操作会记录审计（记操作者与文件名）。
    */
   containerConfigControllerWriteFile(params: types.ContainerConfigControllerWriteFileParams1) {
     const { id, ...body } = params
@@ -50,7 +50,7 @@ export default class ContainerConfig extends ApiClient {
 
   /**
    * @summary 删除单个配置文件
-   * @description 删除 userData/{userId}/config/{fileName}。userinfo.jsonc/json 为承载 access_token 的关键文件，不允许删除（返回 400）。其他文件可删除；AGENTS.md 删除后可通过 PUT /agents-md 重新创建。
+   * @description 删除 userData/{userId}/config/{fileName}。userinfo.jsonc/json 为承载 access_token 的关键文件，不允许删除（返回 400）。其他文件可删除；AGENTS.md 删除后可通过 PUT /agents-md 重新创建。容器归属者本人或管理员（isAdmin）可删；删除的目录恒为容器归属者 userId 的 config 目录，删除操作会记录审计（记操作者与文件名）。
    */
   containerConfigControllerDeleteFile(params: types.ContainerConfigControllerDeleteFileParams) {
     const { id, ...query } = params
@@ -61,7 +61,7 @@ export default class ContainerConfig extends ApiClient {
 
   /**
    * @summary 写入 AGENTS.md 提示词文件
-   * @description 全量覆盖写入 AGENTS.md。文件不存在时自动创建；父目录不存在时递归创建。容器内通过 Docker -v 挂载实时生效。
+   * @description 全量覆盖写入 AGENTS.md。文件不存在时自动创建；父目录不存在时递归创建。容器内通过 Docker -v 挂载实时生效。容器归属者本人或管理员（isAdmin）可写；写入目录恒为容器归属者 userId 的 config 目录，写操作会记录审计（记操作者与文件名）。
    */
   containerConfigControllerWriteAgents(params: types.ContainerConfigControllerWriteAgentsParams1) {
     const { id, ...body } = params

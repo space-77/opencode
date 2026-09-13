@@ -25,12 +25,18 @@ export namespace EnumLists {
     "container_name" = "container_name",
     "ip_port" = "ip_port",
   }
+  export enum RuleType {
+    "whitelist" = "whitelist",
+    "percentage" = "percentage",
+  }
   export enum OperationType {
     "create" = "create",
     "start" = "start",
     "stop" = "stop",
     "delete" = "delete",
     "restart" = "restart",
+    "config_write" = "config_write",
+    "config_delete" = "config_delete",
   }
   export enum OperationResult {
     "success" = "success",
@@ -45,10 +51,30 @@ export namespace EnumLists {
     "failed" = "failed",
   }
   export enum Type {
+    "workspace" = "workspace",
+    "skill" = "skill",
+  }
+  export enum Type1 {
     "positive" = "positive",
     "negative" = "negative",
   }
-  export enum Type1 {
+  export enum Type2 {
+    "positive" = "positive",
+    "negative" = "negative",
+  }
+  export enum Type3 {
+    "positive" = "positive",
+    "negative" = "negative",
+  }
+  export enum Type4 {
+    "positive" = "positive",
+    "negative" = "negative",
+  }
+  export enum Type5 {
+    "positive" = "positive",
+    "negative" = "negative",
+  }
+  export enum Type6 {
     "npm" = "npm",
     "pip" = "pip",
     "linux" = "linux",
@@ -57,12 +83,12 @@ export namespace EnumLists {
     "human" = "human",
     "agent" = "agent",
   }
-  export enum Type2 {
+  export enum Type7 {
     "npm" = "npm",
     "pip" = "pip",
     "linux" = "linux",
   }
-  export enum Type3 {
+  export enum Type8 {
     "npm" = "npm",
     "pip" = "pip",
     "linux" = "linux",
@@ -75,17 +101,21 @@ export namespace EnumLists {
     "asc" = "asc",
     "desc" = "desc",
   }
-  export enum Type4 {
+  export enum Type9 {
     "npm" = "npm",
     "pip" = "pip",
     "linux" = "linux",
   }
-  export enum Type5 {
+  export enum Type10 {
     "npm" = "npm",
     "pip" = "pip",
     "linux" = "linux",
   }
-  export enum Type6 {
+  export enum Type11 {
+    "positive" = "positive",
+    "negative" = "negative",
+  }
+  export enum Type12 {
     "npm" = "npm",
     "pip" = "pip",
     "linux" = "linux",
@@ -196,6 +226,11 @@ export namespace __common__ {
      * @description 最后心跳时间
      */
     heartbeatAt: string | null
+    /**
+     * @example 2024-01-15T10:30:00.000Z
+     * @description 最近一次启动尝试时间（心跳自愈冷却判定用）
+     */
+    lastStartAttemptAt: string | null
     /**
      * @example 1.0
      * @description CPU 限制
@@ -394,6 +429,11 @@ export namespace __common__ {
        * @description 最后心跳时间
        */
       heartbeatAt: string | null
+      /**
+       * @example 2024-01-15T10:30:00.000Z
+       * @description 最近一次启动尝试时间（心跳自愈冷却判定用）
+       */
+      lastStartAttemptAt: string | null
       /**
        * @example 1.0
        * @description CPU 限制
@@ -830,7 +870,7 @@ export namespace __common__ {
     pageSize?: number
     /**
      * @example 123e4567-e89b-12d3-a456-426614174000
-     * @description 按容器 ID 过滤
+     * @description 已废弃：项目身份已与容器解耦，该参数不再影响返回结果集（保留仅为兼容旧客户端）
      */
     containerId?: string
     /**
@@ -860,6 +900,344 @@ export namespace __common__ {
      * @description 每页数量
      */
     pageSize: number
+  }
+
+  export interface GrayRuleSummaryDto {
+    /**
+     * @example percentage
+     * @description 规则类型
+     */
+    ruleType: EnumLists.RuleType
+    /**
+     * @example 20
+     * @description 灰度比例（0-100）
+     */
+    percentage?: number
+    /**
+     * @example user1
+     * @description 白名单用户 ID 列表
+     */
+    userIds?: Array<string>
+    /**
+     * @example true
+     * @description 是否启用
+     */
+    enabled: boolean
+  }
+
+  export interface OpencodeVersionDto {
+    /**
+     * @example 1.18.26
+     * @description 版本号
+     */
+    version: string
+    /**
+     * @example latest
+     * @description 发布通道
+     */
+    channel?: string
+    /**
+     * @example true
+     * @description 是否为镜像提取的基线版本
+     */
+    isBaseline: boolean
+    /**
+     * @description 是否为全局默认版本
+     */
+    isDefault: boolean
+    /**
+     * @example true
+     * @description 是否为 current 软链指向的激活版本
+     */
+    isActive: boolean
+    /**
+     * @example true
+     * @description 二进制是否可用于挂载（文件存在且通过校验）
+     */
+    available: boolean
+    /**
+     * @example 146843792
+     * @description 二进制文件大小（字节）
+     */
+    size?: number
+    /**
+     * @description 二进制 sha256 校验和
+     */
+    sha256?: string
+    /**
+     * @example linux
+     * @description 目标操作系统
+     */
+    os?: string
+    /**
+     * @example arm64
+     * @description 目标 CPU 架构
+     */
+    arch?: string
+    /**
+     * @description 版本备注
+     */
+    note?: string
+    /**
+     * @description 灰度规则摘要
+     */
+    grayRule?: {
+      /**
+       * @example percentage
+       * @description 规则类型
+       */
+      ruleType: RuleType
+      /**
+       * @example 20
+       * @description 灰度比例（0-100）
+       */
+      percentage?: number
+      /**
+       * @example user1
+       * @description 白名单用户 ID 列表
+       */
+      userIds?: Array<string>
+      /**
+       * @example true
+       * @description 是否启用
+       */
+      enabled: boolean
+    }
+    /**
+     * @description 导入时间
+     */
+    createdAt: string
+    /**
+     * @description 更新时间
+     */
+    updatedAt: string
+  }
+
+  export interface OpencodeVersionListDto {
+    /**
+     * @description 版本列表（按版本号倒序）
+     */
+    items: Array<__common__.OpencodeVersionDto>
+    /**
+     * @example 1.18.26
+     * @description 当前激活版本（current 软链指向）
+     */
+    activeVersion: string
+    /**
+     * @example 1.18.26
+     * @description 全局默认版本
+     */
+    defaultVersion: string
+    /**
+     * @example /opt/opencode-versions
+     * @description 版本仓库目录
+     */
+    versionsDir: string
+  }
+
+  export interface InitChunkedUploadResponseDto {
+    /**
+     * @example 550e8400-e29b-41d4-a716-446655440000
+     * @description 上传会话 ID，后续上传分块与合并时使用
+     */
+    uploadId: string
+    /**
+     * @example 2026-09-09T12:00:00.000Z
+     * @description 会话过期时间（ISO 8601）
+     */
+    expiresAt: string
+    /**
+     * @example 30
+     * @description 总分块数
+     */
+    totalChunks: number
+  }
+
+  export interface InitChunkedUploadDto {
+    /**
+     * @example 1.18.26
+     * @description 目标版本号（须与二进制实际输出的版本号一致）
+     */
+    version: string
+    /**
+     * @example 146843792
+     * @description 文件总大小（字节）
+     */
+    totalSize: number
+    /**
+     * @example 30
+     * @description 总分块数（1~1000）
+     */
+    totalChunks: number
+    /**
+     * @example latest
+     * @description 发布通道
+     */
+    channel?: string
+    /**
+     * @description 版本备注
+     */
+    note?: string
+  }
+
+  export interface UploadVersionChunkResponseDto {
+    /**
+     * @example 5
+     * @description 已接收的分块数
+     */
+    receivedChunks: number
+    /**
+     * @example 30
+     * @description 总分块数
+     */
+    totalChunks: number
+  }
+
+  export interface CancelChunkedUploadResponseDto {
+    /**
+     * @example true
+     * @description 是否取消成功
+     */
+    success: boolean
+  }
+
+  export interface UpdateVersionDto {
+    /**
+     * @description 版本备注
+     */
+    note?: string
+    /**
+     * @example true
+     * @description 是否设为全局默认版本（设为 true 时其他版本的默认值会被清除）
+     */
+    isDefault?: boolean
+  }
+
+  export interface ActivateResultDto {
+    /**
+     * @example 1.18.25
+     * @description 切换前的激活版本
+     */
+    previousVersion: string
+    /**
+     * @example 1.18.26
+     * @description 切换后的激活版本
+     */
+    currentVersion: string
+  }
+
+  export interface SetGrayRuleDto {
+    /**
+     * @example 1.18.26
+     * @description 目标版本号
+     */
+    version: string
+    /**
+     * @example percentage
+     * @description 规则类型
+     */
+    ruleType: EnumLists.RuleType
+    /**
+     * @example user1,user2
+     * @description 白名单用户 ID 列表（whitelist 类型必填）
+     */
+    userIds?: Array<string>
+    /**
+     * @example 20
+     * @description 灰度比例 0-100（percentage 类型必填）
+     */
+    percentage?: number
+    /**
+     * @example true
+     * @description 是否启用
+     */
+    enabled?: boolean
+  }
+
+  export interface ContainerVersionUpdateDto {
+    /**
+     * @example 1.18.26
+     * @description 目标版本号；省略时使用当前激活版本
+     */
+    version?: string
+  }
+
+  export interface ContainerUpdateItemDto {
+    /**
+     * @description 容器 ID
+     */
+    containerId: string
+    /**
+     * @description 容器名称
+     */
+    containerName: string
+    /**
+     * @description 所属用户 ID
+     */
+    userId: string
+    /**
+     * @example 1.18.25
+     * @description 更新前的版本
+     */
+    fromVersion: string
+    /**
+     * @example 1.18.26
+     * @description 目标版本
+     */
+    toVersion: string
+    /**
+     * @example true
+     * @description 是否成功
+     */
+    success: boolean
+    /**
+     * @description 失败原因
+     */
+    error?: string
+  }
+
+  export interface BatchUpdateResultDto {
+    /**
+     * @example 1.18.26
+     * @description 目标版本
+     */
+    targetVersion: string
+    /**
+     * @example 10
+     * @description 总容器数
+     */
+    total: number
+    /**
+     * @example 9
+     * @description 成功数
+     */
+    succeeded: number
+    /**
+     * @example 1
+     * @description 失败数
+     */
+    failed: number
+    /**
+     * @description 逐容器结果
+     */
+    items: Array<__common__.ContainerUpdateItemDto>
+  }
+
+  export interface UpdatePreviewDto {
+    /**
+     * @example 1.18.26
+     * @description 目标版本
+     */
+    targetVersion: string
+    /**
+     * @example 8
+     * @description 将被影响的容器数
+     */
+    total: number
+    /**
+     * @description 容器清单
+     */
+    items: Array<__common__.ContainerUpdateItemDto>
   }
 
   export interface HeartbeatDto {
@@ -1124,6 +1502,11 @@ export namespace __common__ {
      */
     errorMessage: string | null
     /**
+     * @example version=1.18.26
+     * @description 操作补充说明（如版本管理操作的目标版本号）
+     */
+    detail: string | null
+    /**
      * @example 2024-01-15T10:30:00.000Z
      * @description 创建时间
      */
@@ -1214,9 +1597,14 @@ export namespace __common__ {
   export interface UploadFileDto {
     /**
      * @example subdir/nested
-     * @description 目标子目录路径，相对于 /workspace，不指定则上传到根目录。支持传入 /workspace 或其子路径
+     * @description 目标子目录路径。type=workspace（默认）时相对于 /workspace，支持传入 /workspace 或其子路径；type=skill 时相对于 skills 目录（userData/{userId}/config/skills）。不指定则上传到目标根目录。
      */
     targetDir?: string
+    /**
+     * @example workspace
+     * @description 上传目标类型。workspace=容器工作区 /workspace（默认，省略时行为与历史一致）；skill=用户自己的 skills 目录，此时 targetDir 按 skills 相对路径解析。
+     */
+    type?: EnumLists.Type
   }
 
   export interface UploadFileResponseDto {
@@ -1250,9 +1638,14 @@ export namespace __common__ {
     totalChunks: number
     /**
      * @example uploads
-     * @description 目标子目录路径，相对于 /workspace，不指定则上传到根目录。支持传入 /workspace 或其子路径
+     * @description 目标子目录路径。type=workspace（默认）时相对于 /workspace；type=skill 时相对于 skills 目录。
      */
     targetDir?: string
+    /**
+     * @example workspace
+     * @description 上传目标类型。workspace=容器工作区 /workspace（默认）；skill=用户自己的 skills 目录。会话创建后类型即固定，后续分块与合并沿用该类型。
+     */
+    type?: EnumLists.Type
   }
 
   export interface InitUploadResponseDto {
@@ -1366,9 +1759,14 @@ export namespace __common__ {
   export interface CreateFolderDto {
     /**
      * @example default/a/b/c
-     * @description 要创建的文件夹路径，相对于 /workspace。路径中不存在的层级会自动递归创建；已存在时幂等成功。支持传入 /workspace 或其子路径
+     * @description 要创建的文件夹路径。type=workspace（默认）时相对于 /workspace，路径中不存在的层级会自动递归创建；已存在时幂等成功。type=skill 时相对于 skills 目录（userData/{userId}/config/skills）。
      */
     folderPath: string
+    /**
+     * @example workspace
+     * @description 上传目标类型。workspace=容器工作区 /workspace（默认）；skill=用户自己的 skills 目录。
+     */
+    type?: EnumLists.Type
   }
 
   export interface CreateFolderResponseDto {
@@ -1481,7 +1879,7 @@ export namespace __common__ {
      * @example positive
      * @description 反馈类型：positive（功能很赞）/ negative（功能有问题）
      */
-    type: EnumLists.Type
+    type: EnumLists.Type1
     /**
      * @example <p>功能很赞</p>
      * @description 富文本内容，入库前会将 MinIO 签名 URL 归一化为标记存储
@@ -1499,7 +1897,7 @@ export namespace __common__ {
      * @example negative
      * @description 反馈类型：positive（功能很赞）/ negative（功能有问题）
      */
-    type?: EnumLists.Type
+    type?: EnumLists.Type2
     /**
      * @example <p>功能有问题</p>
      * @description 富文本内容，入库前会将 MinIO 签名 URL 归一化为标记存储
@@ -1527,7 +1925,7 @@ export namespace __common__ {
      * @example positive
      * @description 反馈类型过滤：positive / negative
      */
-    type?: EnumLists.Type
+    type?: EnumLists.Type3
   }
 
   export interface FeedbackResponseDto {
@@ -1555,7 +1953,7 @@ export namespace __common__ {
      * @example positive
      * @description 反馈类型
      */
-    type: EnumLists.Type
+    type: EnumLists.Type4
     /**
      * @description 富文本内容（详情接口已将 MinIO 标记还原为签名 URL；列表接口为归一化存储内容）
      */
@@ -1601,7 +1999,7 @@ export namespace __common__ {
      * @example positive
      * @description 反馈类型
      */
-    type: EnumLists.Type
+    type: EnumLists.Type5
     /**
      * @description 富文本内容（归一化存储内容）
      */
@@ -1745,7 +2143,7 @@ You are an opencode agent...
      * @example pip
      * @description 依赖类型：npm / pip / linux
      */
-    type: EnumLists.Type1
+    type: EnumLists.Type6
     /**
      * @example pandas
      * @description 依赖包名称
@@ -1773,7 +2171,7 @@ You are an opencode agent...
      * @example pip
      * @description 依赖类型：npm / pip / linux
      */
-    type?: EnumLists.Type2
+    type?: EnumLists.Type7
     /**
      * @example pandas
      * @description 依赖包名称
@@ -1814,7 +2212,7 @@ You are an opencode agent...
      * @example pip
      * @description 依赖类型过滤：npm / pip / linux
      */
-    type?: EnumLists.Type3
+    type?: EnumLists.Type8
     /**
      * @example agent
      * @description 来源类型过滤：human / agent
@@ -1850,7 +2248,7 @@ You are an opencode agent...
      * @example pip
      * @description 依赖类型
      */
-    type: EnumLists.Type4
+    type: EnumLists.Type9
     /**
      * @example pandas
      * @description 依赖包名称
@@ -1917,7 +2315,7 @@ You are an opencode agent...
      * @example pip
      * @description 依赖类型
      */
-    type: EnumLists.Type5
+    type: EnumLists.Type10
     /**
      * @example pandas
      * @description 依赖包名称
@@ -1995,6 +2393,94 @@ You are an opencode agent...
      * @description 每页数量
      */
     pageSize: number
+  }
+
+  export interface SkillItemDto {
+    /**
+     * @example my-skill
+     * @description skill 目录名（skills 目录下的直接子目录名）
+     */
+    dirName: string
+    /**
+     * @example my-skill
+     * @description SKILL.md frontmatter 中的 name；条目不合规时为目录名
+     */
+    name: string
+    /**
+     * @example 做某件事的技能
+     * @description SKILL.md frontmatter 中的 description
+     */
+    description?: string
+    /**
+     * @example true
+     * @description 是否启用（未被 opencode.jsonc 的 permission.skill deny）
+     */
+    enabled: boolean
+    /**
+     * @example my-skill
+     * @description skill 在 skills 目录下的相对路径
+     */
+    path: string
+    /**
+     * @example Missing SKILL.md
+     * @description 条目不合规或与其他条目冲突的原因；合规且无冲突时为 null
+     */
+    issue?: string
+  }
+
+  export interface SkillListDto {
+    /**
+     * @description skill 列表（按名称排序）
+     */
+    items: Array<__common__.SkillItemDto>
+    /**
+     * @example /app/userData/u1/config/skills
+     * @description skills 根目录在宿主机上的绝对路径
+     */
+    root: string
+  }
+
+  export interface SkillValidateResponseDto {
+    /**
+     * @example my-skill
+     * @description skill 目录名
+     */
+    dirName: string
+    /**
+     * @example my-skill
+     * @description SKILL.md frontmatter 中的 name
+     */
+    name: string
+    /**
+     * @example 做某件事的技能
+     * @description SKILL.md frontmatter 中的 description
+     */
+    description: string
+    /**
+     * @example my-skill
+     * @description skill 在 skills 目录下的相对路径
+     */
+    path: string
+  }
+
+  export interface SkillActionResponseDto {
+    /**
+     * @example my-skill
+     * @description skill 目录名
+     */
+    dirName: string
+    /**
+     * @description 操作后的启用状态（删除接口恒为 true，表示无禁用记录残留）
+     */
+    enabled: boolean
+  }
+
+  export interface ImportSkillArchiveDto {
+    /**
+     * @example true
+     * @description 是否覆盖已存在的同名 skill 目录。默认 true（幂等更新）；false 且同名目录已存在时返回 409。
+     */
+    overwrite?: boolean
   }
 
   export interface LogsT {
@@ -2341,7 +2827,7 @@ export namespace Projects {
      */
     pageSize?: number
     /**
-     * @description 按容器 ID 过滤
+     * @description 已废弃：项目身份已与容器解耦，该参数不再影响返回结果集（保留仅为兼容旧客户端）
      */
     containerId?: string
     /**
@@ -2447,6 +2933,503 @@ export namespace Projects {
 
   export type RProjectsControllerUpdate = Promise<
     [any, Projects.ProjectsControllerUpdateRes["data"], Projects.ProjectsControllerUpdateRes]
+  >
+}
+
+export namespace OpencodeVersions {
+  export interface OpencodeVersionControllerListRes {
+    /**
+     * @example 200
+     */
+    code: number
+    /**
+     * @example success
+     */
+    message: string
+    data: __common__.OpencodeVersionListDto
+  }
+
+  export interface OpencodeVersionControllerListParams {}
+
+  export interface OpencodeVersionControllerUploadRes {
+    /**
+     * @example 200
+     */
+    code: number
+    /**
+     * @example success
+     */
+    message: string
+    data: __common__.OpencodeVersionDto
+  }
+
+  export interface OpencodeVersionControllerUploadParams {}
+
+  export interface OpencodeVersionControllerUploadBody {
+    /**
+     * @description opencode 二进制文件
+     */
+    file: File
+    /**
+     * @example 1.18.26
+     * @description 目标版本号
+     */
+    version: string
+    /**
+     * @example latest
+     * @description 发布通道
+     */
+    channel?: string
+    /**
+     * @description 版本备注
+     */
+    note?: string
+  }
+
+  export interface OpencodeVersionControllerInitChunkedRes {
+    /**
+     * @example 200
+     */
+    code: number
+    /**
+     * @example success
+     */
+    message: string
+    data: __common__.InitChunkedUploadResponseDto
+  }
+
+  export interface OpencodeVersionControllerInitChunkedParams {}
+
+  export interface OpencodeVersionControllerInitChunkedBody extends __common__.InitChunkedUploadDto {}
+
+  export interface OpencodeVersionControllerUploadChunkRes {
+    /**
+     * @example 200
+     */
+    code: number
+    /**
+     * @example success
+     */
+    message: string
+    data: __common__.UploadVersionChunkResponseDto
+  }
+
+  export interface OpencodeVersionControllerUploadChunkParams {
+    /**
+     * @description 上传会话 ID
+     */
+    uploadId: string
+  }
+
+  export interface OpencodeVersionControllerUploadChunkBody {
+    /**
+     * @description 分块数据
+     */
+    chunk: File
+    /**
+     * @description 分块索引（从 0 开始）
+     */
+    chunkIndex: number
+  }
+
+  export interface OpencodeVersionControllerCompleteChunkedRes {
+    /**
+     * @example 200
+     */
+    code: number
+    /**
+     * @example success
+     */
+    message: string
+    data: __common__.OpencodeVersionDto
+  }
+
+  export interface OpencodeVersionControllerCompleteChunkedParams {
+    /**
+     * @description 上传会话 ID
+     */
+    uploadId: string
+  }
+
+  export interface OpencodeVersionControllerCancelChunkedRes {
+    /**
+     * @example 200
+     */
+    code: number
+    /**
+     * @example success
+     */
+    message: string
+    data: __common__.CancelChunkedUploadResponseDto
+  }
+
+  export interface OpencodeVersionControllerCancelChunkedParams {
+    /**
+     * @description 上传会话 ID
+     */
+    uploadId: string
+  }
+
+  export interface OpencodeVersionControllerRemoveRes {
+    /**
+     * @example 200
+     */
+    code: number
+    /**
+     * @example success
+     */
+    message: string
+    data: { success?: boolean }
+  }
+
+  export interface OpencodeVersionControllerRemoveParams {
+    /**
+     * @description 版本号
+     */
+    version: string
+  }
+
+  export interface OpencodeVersionControllerUpdateRes {
+    /**
+     * @example 200
+     */
+    code: number
+    /**
+     * @example success
+     */
+    message: string
+    data: __common__.OpencodeVersionDto
+  }
+
+  export interface OpencodeVersionControllerUpdateParams {
+    /**
+     * @description 版本号
+     */
+    version: string
+  }
+
+  export interface OpencodeVersionControllerUpdateBody extends __common__.UpdateVersionDto {}
+
+  export interface OpencodeVersionControllerDiagnoseRes {
+    /**
+     * @example 200
+     */
+    code: number
+    /**
+     * @example success
+     */
+    message: string
+    data: {
+      enabled?: boolean
+      versionsDir?: string
+      hostDir?: string
+      mountSource?: string | null
+      mountable?: boolean
+      activeVersion?: string | null
+      defaultVersion?: string | null
+      availableVersions?: Array<string>
+      diagnosis?: { ok?: boolean; reason?: string }
+    }
+  }
+
+  export interface OpencodeVersionControllerDiagnoseParams {}
+
+  export interface OpencodeVersionControllerRepairCurrentRes {
+    /**
+     * @example 200
+     */
+    code: number
+    /**
+     * @example success
+     */
+    message: string
+    data: { version?: string; repaired?: boolean; reason?: string } | null
+  }
+
+  export interface OpencodeVersionControllerRepairCurrentParams {}
+
+  export interface OpencodeVersionControllerActivateRes {
+    /**
+     * @example 200
+     */
+    code: number
+    /**
+     * @example success
+     */
+    message: string
+    data: __common__.ActivateResultDto
+  }
+
+  export interface OpencodeVersionControllerActivateParams {
+    /**
+     * @description 目标版本号
+     */
+    version: string
+  }
+
+  export interface OpencodeVersionControllerRollbackRes {
+    /**
+     * @example 200
+     */
+    code: number
+    /**
+     * @example success
+     */
+    message: string
+    data: __common__.ActivateResultDto
+  }
+
+  export interface OpencodeVersionControllerRollbackParams {}
+
+  export interface OpencodeVersionControllerSetGrayRes {
+    /**
+     * @example 200
+     */
+    code: number
+    /**
+     * @example success
+     */
+    message: string
+    data: {
+      version?: string
+      ruleType?: string
+      percentage?: number | null
+      userIds?: Array<string> | null
+      enabled?: boolean
+    }
+  }
+
+  export interface OpencodeVersionControllerSetGrayParams {}
+
+  export interface OpencodeVersionControllerSetGrayBody extends __common__.SetGrayRuleDto {}
+
+  export interface OpencodeVersionControllerGetGrayRes {
+    /**
+     * @example 200
+     */
+    code: number
+    /**
+     * @example success
+     */
+    message: string
+    data: {
+      version?: string
+      ruleType?: string
+      percentage?: number | null
+      userIds?: Array<string> | null
+      enabled?: boolean
+    } | null
+  }
+
+  export interface OpencodeVersionControllerGetGrayParams {
+    /**
+     * @description 版本号
+     */
+    version: string
+  }
+
+  export interface OpencodeVersionControllerClearGrayRes {
+    /**
+     * @example 200
+     */
+    code: number
+    /**
+     * @example success
+     */
+    message: string
+    data: { success?: boolean }
+  }
+
+  export interface OpencodeVersionControllerClearGrayParams {
+    /**
+     * @description 版本号
+     */
+    version: string
+  }
+
+  export interface OpencodeVersionControllerUpdateContainerRes {
+    /**
+     * @example 200
+     */
+    code: number
+    /**
+     * @example success
+     */
+    message: string
+    data: __common__.ActivateResultDto
+  }
+
+  export interface OpencodeVersionControllerUpdateContainerParams {
+    /**
+     * @description 容器 ID
+     */
+    containerId: string
+  }
+
+  export interface OpencodeVersionControllerUpdateContainerBody extends __common__.ContainerVersionUpdateDto {}
+
+  export interface OpencodeVersionControllerBatchUpdateRes {
+    /**
+     * @example 200
+     */
+    code: number
+    /**
+     * @example success
+     */
+    message: string
+    data: __common__.BatchUpdateResultDto
+  }
+
+  export interface OpencodeVersionControllerBatchUpdateParams {}
+
+  export interface OpencodeVersionControllerBatchUpdateBody extends __common__.ContainerVersionUpdateDto {}
+
+  export interface OpencodeVersionControllerPreviewBatchRes {
+    /**
+     * @example 200
+     */
+    code: number
+    /**
+     * @example success
+     */
+    message: string
+    data: __common__.UpdatePreviewDto
+  }
+
+  export interface OpencodeVersionControllerPreviewBatchParams {}
+
+  export interface OpencodeVersionControllerPreviewBatchBody extends __common__.ContainerVersionUpdateDto {}
+
+  export type ROpencodeVersionControllerList = Promise<
+    [any, OpencodeVersions.OpencodeVersionControllerListRes["data"], OpencodeVersions.OpencodeVersionControllerListRes]
+  >
+  export type ROpencodeVersionControllerUpload = Promise<
+    [
+      any,
+      OpencodeVersions.OpencodeVersionControllerUploadRes["data"],
+      OpencodeVersions.OpencodeVersionControllerUploadRes,
+    ]
+  >
+  export type ROpencodeVersionControllerRemove = Promise<
+    [
+      any,
+      OpencodeVersions.OpencodeVersionControllerRemoveRes["data"],
+      OpencodeVersions.OpencodeVersionControllerRemoveRes,
+    ]
+  >
+  export type OpencodeVersionControllerUpdateParams1 = OpencodeVersionControllerUpdateParams &
+    __common__.UpdateVersionDto
+
+  export type ROpencodeVersionControllerUpdate = Promise<
+    [
+      any,
+      OpencodeVersions.OpencodeVersionControllerUpdateRes["data"],
+      OpencodeVersions.OpencodeVersionControllerUpdateRes,
+    ]
+  >
+  export type ROpencodeVersionControllerSetGray = Promise<
+    [
+      any,
+      OpencodeVersions.OpencodeVersionControllerSetGrayRes["data"],
+      OpencodeVersions.OpencodeVersionControllerSetGrayRes,
+    ]
+  >
+  export type ROpencodeVersionControllerGetGray = Promise<
+    [
+      any,
+      OpencodeVersions.OpencodeVersionControllerGetGrayRes["data"],
+      OpencodeVersions.OpencodeVersionControllerGetGrayRes,
+    ]
+  >
+  export type ROpencodeVersionControllerDiagnose = Promise<
+    [
+      any,
+      OpencodeVersions.OpencodeVersionControllerDiagnoseRes["data"],
+      OpencodeVersions.OpencodeVersionControllerDiagnoseRes,
+    ]
+  >
+  export type ROpencodeVersionControllerActivate = Promise<
+    [
+      any,
+      OpencodeVersions.OpencodeVersionControllerActivateRes["data"],
+      OpencodeVersions.OpencodeVersionControllerActivateRes,
+    ]
+  >
+  export type ROpencodeVersionControllerRollback = Promise<
+    [
+      any,
+      OpencodeVersions.OpencodeVersionControllerRollbackRes["data"],
+      OpencodeVersions.OpencodeVersionControllerRollbackRes,
+    ]
+  >
+  export type ROpencodeVersionControllerClearGray = Promise<
+    [
+      any,
+      OpencodeVersions.OpencodeVersionControllerClearGrayRes["data"],
+      OpencodeVersions.OpencodeVersionControllerClearGrayRes,
+    ]
+  >
+  export type ROpencodeVersionControllerInitChunked = Promise<
+    [
+      any,
+      OpencodeVersions.OpencodeVersionControllerInitChunkedRes["data"],
+      OpencodeVersions.OpencodeVersionControllerInitChunkedRes,
+    ]
+  >
+  export type OpencodeVersionControllerUploadChunkParams1 = OpencodeVersionControllerUploadChunkParams &
+    OpencodeVersionControllerUploadChunkBody
+
+  export type ROpencodeVersionControllerUploadChunk = Promise<
+    [
+      any,
+      OpencodeVersions.OpencodeVersionControllerUploadChunkRes["data"],
+      OpencodeVersions.OpencodeVersionControllerUploadChunkRes,
+    ]
+  >
+  export type ROpencodeVersionControllerBatchUpdate = Promise<
+    [
+      any,
+      OpencodeVersions.OpencodeVersionControllerBatchUpdateRes["data"],
+      OpencodeVersions.OpencodeVersionControllerBatchUpdateRes,
+    ]
+  >
+  export type ROpencodeVersionControllerPreviewBatch = Promise<
+    [
+      any,
+      OpencodeVersions.OpencodeVersionControllerPreviewBatchRes["data"],
+      OpencodeVersions.OpencodeVersionControllerPreviewBatchRes,
+    ]
+  >
+  export type ROpencodeVersionControllerCancelChunked = Promise<
+    [
+      any,
+      OpencodeVersions.OpencodeVersionControllerCancelChunkedRes["data"],
+      OpencodeVersions.OpencodeVersionControllerCancelChunkedRes,
+    ]
+  >
+  export type ROpencodeVersionControllerRepairCurrent = Promise<
+    [
+      any,
+      OpencodeVersions.OpencodeVersionControllerRepairCurrentRes["data"],
+      OpencodeVersions.OpencodeVersionControllerRepairCurrentRes,
+    ]
+  >
+  export type ROpencodeVersionControllerCompleteChunked = Promise<
+    [
+      any,
+      OpencodeVersions.OpencodeVersionControllerCompleteChunkedRes["data"],
+      OpencodeVersions.OpencodeVersionControllerCompleteChunkedRes,
+    ]
+  >
+  export type OpencodeVersionControllerUpdateContainerParams1 = OpencodeVersionControllerUpdateContainerParams &
+    __common__.ContainerVersionUpdateDto
+
+  export type ROpencodeVersionControllerUpdateContainer = Promise<
+    [
+      any,
+      OpencodeVersions.OpencodeVersionControllerUpdateContainerRes["data"],
+      OpencodeVersions.OpencodeVersionControllerUpdateContainerRes,
+    ]
   >
 }
 
@@ -3060,9 +4043,14 @@ export namespace FileUpload {
     file: File
     /**
      * @example uploads/documents
-     * @description 目标子目录（相对于 /workspace），可选
+     * @description 目标子目录。type=workspace（默认）时相对于 /workspace；type=skill 时相对于 skills 目录。可选
      */
     targetDir?: string
+    /**
+     * @example workspace
+     * @description 上传目标类型：workspace=容器工作区（默认，省略时行为与历史一致）；skill=用户自己的 skills 目录。可选
+     */
+    type?: EnumLists.Type
   }
 
   export interface FileUploadControllerConvertMarkdownRes {
@@ -3106,7 +4094,7 @@ export namespace FileUpload {
   }
 
   /**
-   * @description 分块上传初始化参数
+   * @description 分块上传初始化参数。type=skill 时 targetDir 按 skills 目录相对路径解析。
    */
   export interface FileUploadInitMultipartBody extends __common__.InitMultipartUploadDto {}
 
@@ -3264,7 +4252,7 @@ export namespace FileUpload {
   }
 
   /**
-   * @description 要创建的文件夹路径（相对 /workspace）
+   * @description 要创建的文件夹路径及目标类型（默认 workspace）
    */
   export interface WorkspaceFolderControllerCreateBody extends __common__.CreateFolderDto {}
 
@@ -3500,7 +4488,7 @@ export namespace Feedback {
     /**
      * @description 反馈类型过滤：positive / negative
      */
-    type?: EnumLists.Type
+    type?: EnumLists.Type11
   }
 
   export interface FeedbackControllerCreateRes {
@@ -3838,7 +4826,7 @@ export namespace DependencyRequests {
     /**
      * @description 依赖类型过滤：npm / pip / linux
      */
-    type?: EnumLists.Type6
+    type?: EnumLists.Type12
     /**
      * @description 来源类型过滤：human / agent
      */
@@ -4009,5 +4997,142 @@ export namespace DependencyRequests {
       DependencyRequests.DependencyRequestControllerMarkCollectedRes["data"],
       DependencyRequests.DependencyRequestControllerMarkCollectedRes,
     ]
+  >
+}
+
+export namespace Skills {
+  export interface SkillControllerListRes {
+    /**
+     * @example 200
+     */
+    code: number
+    /**
+     * @example success
+     */
+    message: string
+    data: __common__.SkillListDto
+  }
+
+  export interface SkillControllerListParams {}
+
+  export interface SkillControllerImportArchiveRes {
+    /**
+     * @example 200
+     */
+    code: number
+    /**
+     * @example success
+     */
+    message: string
+    data: __common__.SkillValidateResponseDto
+  }
+
+  export interface SkillControllerImportArchiveParams {}
+
+  export interface SkillControllerImportArchiveBody {
+    /**
+     * @description skill 压缩包
+     */
+    file: File
+    /**
+     * @example true
+     * @description 是否覆盖已存在的同名 skill 目录，默认 true；false 且已存在时返回 409
+     */
+    overwrite?: boolean
+  }
+
+  export interface SkillControllerValidateRes {
+    /**
+     * @example 200
+     */
+    code: number
+    /**
+     * @example success
+     */
+    message: string
+    data: __common__.SkillValidateResponseDto
+  }
+
+  export interface SkillControllerValidateParams {
+    /**
+     * @description skill 目录名
+     */
+    name: string
+  }
+
+  export interface SkillControllerDisableRes {
+    /**
+     * @example 200
+     */
+    code: number
+    /**
+     * @example success
+     */
+    message: string
+    data: __common__.SkillActionResponseDto
+  }
+
+  export interface SkillControllerDisableParams {
+    /**
+     * @description skill 目录名
+     */
+    name: string
+  }
+
+  export interface SkillControllerEnableRes {
+    /**
+     * @example 200
+     */
+    code: number
+    /**
+     * @example success
+     */
+    message: string
+    data: __common__.SkillActionResponseDto
+  }
+
+  export interface SkillControllerEnableParams {
+    /**
+     * @description skill 目录名
+     */
+    name: string
+  }
+
+  export interface SkillControllerRemoveRes {
+    /**
+     * @example 200
+     */
+    code: number
+    /**
+     * @example success
+     */
+    message: string
+    data: __common__.SkillActionResponseDto
+  }
+
+  export interface SkillControllerRemoveParams {
+    /**
+     * @description skill 目录名
+     */
+    name: string
+  }
+
+  export type RSkillControllerList = Promise<
+    [any, Skills.SkillControllerListRes["data"], Skills.SkillControllerListRes]
+  >
+  export type RSkillControllerEnable = Promise<
+    [any, Skills.SkillControllerEnableRes["data"], Skills.SkillControllerEnableRes]
+  >
+  export type RSkillControllerRemove = Promise<
+    [any, Skills.SkillControllerRemoveRes["data"], Skills.SkillControllerRemoveRes]
+  >
+  export type RSkillControllerDisable = Promise<
+    [any, Skills.SkillControllerDisableRes["data"], Skills.SkillControllerDisableRes]
+  >
+  export type RSkillControllerValidate = Promise<
+    [any, Skills.SkillControllerValidateRes["data"], Skills.SkillControllerValidateRes]
+  >
+  export type RSkillControllerImportArchive = Promise<
+    [any, Skills.SkillControllerImportArchiveRes["data"], Skills.SkillControllerImportArchiveRes]
   >
 }

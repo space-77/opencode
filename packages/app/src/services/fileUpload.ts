@@ -98,8 +98,8 @@ export default class FileUpload extends ApiClient {
   }
 
   /**
-   * @summary 在工作区内按多级路径递归创建文件夹
-   * @description 在容器工作区内按相对路径创建文件夹，缺失的中间层级自动递归创建（mkdir -p 语义）。目标文件夹已存在时幂等成功，返回创建后的完整路径。与 POST /containers/:id/workspace/folders（分配会话工作区，单层目录）语义不同。
+   * @summary 按多级路径递归创建文件夹
+   * @description 在目标根目录下按相对路径创建文件夹，缺失的中间层级自动递归创建（mkdir -p 语义）。目标文件夹已存在时幂等成功，返回创建后的完整路径。type=workspace（默认）时根目录为容器工作区 /workspace（与 POST /containers/:id/workspace/folders 的分配会话工作区语义不同）；type=skill 时根目录为用户的 skills 目录，folderPath 按 skills 相对路径解析。与 POST /containers/:id/workspace/folders（分配会话工作区，单层目录）语义不同。
    */
   workspaceFolderControllerCreate(params: types.WorkspaceFolderControllerCreateParams1) {
     const { id, ...body } = params
