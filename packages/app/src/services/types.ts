@@ -1816,6 +1816,11 @@ export namespace __common__ {
      * @description 结束行号（从 1 开始，含），最大允许 总行数 + 1（末尾追加）
      */
     endLine?: number
+    /**
+     * @example e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+     * @description 基线版本令牌（取自 GET 返回的 version）。提供时执行乐观并发校验：与服务器当前内容版本不一致则拒绝写入并返回 409（回带最新 content/version）；缺省时保持既有直接写入语义
+     */
+    baseVersion?: string
   }
 
   export interface RenameFileDto {
@@ -1872,6 +1877,24 @@ export namespace __common__ {
 * @description 文件内容（UTF-8 文本）
 */
     content: string
+    /**
+     * @example e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+     * @description 文件内容的版本令牌（SHA-256 校验和），供后续 PATCH 的 baseVersion 乐观并发校验使用
+     */
+    version: string
+  }
+
+  export interface WorkspaceFileUpdateResponseDto {
+    /**
+     * @example /workspace/default/project/note.md
+     * @description 文件在工作区内的完整路径
+     */
+    path: string
+    /**
+     * @example e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+     * @description 写入后文件内容的版本令牌（SHA-256 校验和），供后续乐观并发校验（baseVersion）使用
+     */
+    version: string
   }
 
   export interface CreateFeedbackDto {
@@ -4377,7 +4400,7 @@ export namespace WorkspaceFile {
      * @example success
      */
     message: string
-    data: __common__.WorkspaceFilePathResponseDto
+    data: __common__.WorkspaceFileUpdateResponseDto
   }
 
   export interface WorkspaceFileControllerUpdateParams {

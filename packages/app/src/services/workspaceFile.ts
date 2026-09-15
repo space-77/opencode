@@ -50,7 +50,7 @@ export default class WorkspaceFile extends ApiClient {
 
   /**
    * @summary 修改工作区文件内容
-   * @description 全量覆盖文件内容，或按行范围替换指定行内容（行号从 1 开始，闭区间 [startLine, endLine]，语义对齐常见文本编辑器）。不传 startLine/endLine 时为全文覆盖；content 为空串时删除指定行范围；endLine 允许为 总行数 + 1 以在末尾追加。
+   * @description 全量覆盖文件内容，或按行范围替换指定行内容（行号从 1 开始，闭区间 [startLine, endLine]，语义对齐常见文本编辑器）。不传 startLine/endLine 时为全文覆盖；content 为空串时删除指定行范围；endLine 允许为 总行数 + 1 以在末尾追加。可选 baseVersion 用于乐观并发校验：与服务器当前内容版本不一致时拒绝写入并返回 409（回带最新 content/version）；成功返回写入后的最新 version。
    */
   workspaceFileControllerUpdate(params: types.WorkspaceFileControllerUpdateParams1) {
     const { id, ...body } = params
@@ -72,7 +72,7 @@ export default class WorkspaceFile extends ApiClient {
 
   /**
    * @summary 获取工作区文件内容
-   * @description 读取容器工作区（映射到宿主机 userData/{userId}/workspace）中指定文件的内容（UTF-8 文本）。
+   * @description 读取容器工作区（映射到宿主机 userData/{userId}/workspace）中指定文件的内容（UTF-8 文本），并返回基于内容计算的版本令牌 version（SHA-256），供后续 PATCH 的 baseVersion 乐观并发校验使用。
    */
   workspaceFileControllerGetContent(params: types.WorkspaceFileControllerGetContentParams) {
     const { id, ...query } = params
