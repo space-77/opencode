@@ -27,8 +27,8 @@ export default class WorkspaceFile extends ApiClient {
   }
 
   /**
-   * @summary 新建工作区文件
-   * @description 在容器工作区（映射到宿主机 userData/{userId}/workspace）中新建文件，可携带初始内容。overwrite 控制是否覆盖已存在文件，默认 false；文件已存在且不覆盖时返回 409。
+   * @summary 新建工作区文件或目录
+   * @description 在容器工作区（映射到宿主机 userData/{userId}/workspace）中新建文件，可携带初始内容。overwrite 控制是否覆盖已存在文件，默认 false；文件已存在且不覆盖时返回 409。directory 为 true 时改为在目标路径创建目录（父目录递归创建，忽略 content/overwrite，目标已存在返回 409）。
    */
   workspaceFileControllerCreate(params: types.WorkspaceFileControllerCreateParams1) {
     const { id, ...body } = params

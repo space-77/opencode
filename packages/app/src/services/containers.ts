@@ -78,35 +78,13 @@ export default class Containers extends ApiClient {
 
   /**
    * @summary 修改容器配置
-   * @description 修改容器的可变字段（agentName / cpuLimit / memoryLimit / workDirectory）。容器归属者本人或管理员（isAdmin）可操作。restartIfRunning 默认 false 仅写入 DB；为 true 且容器处于 RUNNING 时通过 docker update 热更新资源限制，失败则回退重启。
+   * @description 修改容器的可变字段（agentName / cpuLimit / memoryLimit / workDirectory / idleTimeoutMinutes）。容器归属者本人或管理员（isAdmin）可操作。cpuLimit / memoryLimit 有变化且 Docker 容器存在（RUNNING / STOPPED 均可）时立即通过 docker update 热更新资源限制；update 失败时仅当 restartIfRunning=true 回退 stop + start 重启生效，默认直接返回错误。
    */
   containersControllerUpdate(params: types.ContainersControllerUpdateParams1) {
     const { id, ...body } = params
     const url = `/containers/${id}`
     const config: DocReqConfig = { url, body, method: "patch" }
     return this.request<types.RContainersControllerUpdate>(config)
-  }
-
-  /**
-   * @summary 重启容器（容器内 Agent 自重启）
-   * @description 仅要求 Authorization: Bearer <token>（无需 indicatorUserId 头）。受理后先通知前端打开全局 loading，延迟 2 秒再重启容器；重启完成后通知前端恢复。接口立即返回，不等待重启完成
-   */
-  containersControllerRestart(params: types.ContainersControllerRestartParams) {
-    const { id, ...headers } = params
-    const url = `/containers/${id}/restart`
-    const config: DocReqConfig = { url, headers, method: "post" }
-    return this.request<types.RContainersControllerRestart>(config)
-  }
-
-  /**
-   * @summary 热重载容器配置
-   * @description 仅要求 Authorization: Bearer <token>（无需 indicatorUserId 头）。直接转发到容器内 POST /system/hot-reload，不延迟、不重启容器；容器内 server 负责发布 hot_reload/hot_reload_complete/hot_reload_failed 事件通知前端
-   */
-  containersControllerHotReload(params: types.ContainersControllerHotReloadParams) {
-    const { id, ...headers } = params
-    const url = `/containers/${id}/system/hot-reload`
-    const config: DocReqConfig = { url, headers, method: "post" }
-    return this.request<types.RContainersControllerHotReload>(config)
   }
 
   /**
@@ -129,6 +107,41 @@ export default class Containers extends ApiClient {
     const url = `/containers/${id}/workspace/available`
     const config: DocReqConfig = { url, method: "get" }
     return this.request<types.RContainersGetAvailableWorkspace>(config)
+  }
+
+  /**
+   * @param { String } id 容器的唯一标识符 (UUID)
+   * @summary 查询用户指引状态
+   * @description 返回该容器归属用户的新手引导状态。从未上报过的容器返回 pending，前端据此判断是否需要自动启动引导。仅归属者本人或管理员可查询。
+   */
+  containersControllerGetTourState(id: string) {
+    const config: DocReqConfig = {
+      url: `/containers/${id}/tour`,
+      method: "get",
+    }
+    return this.request<types.RContainersControllerGetTourState>(config)
+  }
+
+  /**
+   * @summary 保存用户指引状态
+   * @description 上报新手引导的当前状态与停留步骤。前端 localStorage 为权威，此处仅做服务端留痕；version 需与前端步骤表版本一致。仅归属者本人或管理员可操作。
+   */
+  containersControllerSaveTourState(params: types.ContainersControllerSaveTourStateParams1) {
+    const { id, ...body } = params
+    const url = `/containers/${id}/tour`
+    const config: DocReqConfig = { url, body, method: "put" }
+    return this.request<types.RContainersControllerSaveTourState>(config)
+  }
+
+  /**
+   * @param { String } id 容器的唯一标识符 (UUID)
+   * @summary 重置用户指引
+   * @description 清空指引状态回到 pending，下次进入页面将重新开始引导。供用户主动重看或运营/客服手动触发。仅归属者本人或管理员可操作。
+   */
+  containersControllerResetTourState(id: string) {
+    const url = `/containers/${id}/tour/reset`
+    const config: DocReqConfig = { url, method: "post" }
+    return this.request<types.RContainersControllerResetTourState>(config)
   }
 }
 export const containers = new Containers()

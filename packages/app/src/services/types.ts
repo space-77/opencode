@@ -25,6 +25,18 @@ export namespace EnumLists {
     "container_name" = "container_name",
     "ip_port" = "ip_port",
   }
+  export enum Status1 {
+    "pending" = "pending",
+    "active" = "active",
+    "completed" = "completed",
+    "skipped" = "skipped",
+  }
+  export enum Status2 {
+    "pending" = "pending",
+    "active" = "active",
+    "completed" = "completed",
+    "skipped" = "skipped",
+  }
   export enum RuleType {
     "whitelist" = "whitelist",
     "percentage" = "percentage",
@@ -37,6 +49,12 @@ export namespace EnumLists {
     "restart" = "restart",
     "config_write" = "config_write",
     "config_delete" = "config_delete",
+    "template_write" = "template_write",
+    "tmpl_skill_write" = "tmpl_skill_write",
+    "tmpl_tool_write" = "tmpl_tool_write",
+    "model_sync" = "model_sync",
+    "cfg_batch_sync" = "cfg_batch_sync",
+    "ct_batch_restart" = "ct_batch_restart",
   }
   export enum OperationResult {
     "success" = "success",
@@ -111,6 +129,11 @@ export namespace EnumLists {
     "pip" = "pip",
     "linux" = "linux",
   }
+  export enum FileName {
+    "AGENTS.md" = "AGENTS.md",
+    "opencode.jsonc" = "opencode.jsonc",
+    "userinfo.jsonc" = "userinfo.jsonc",
+  }
   export enum Type11 {
     "positive" = "positive",
     "negative" = "negative",
@@ -119,6 +142,12 @@ export namespace EnumLists {
     "npm" = "npm",
     "pip" = "pip",
     "linux" = "linux",
+  }
+  export enum Mirror {
+    "apt" = "apt",
+    "pip" = "pip",
+    "npm" = "npm",
+    "cdn" = "cdn",
   }
 }
 
@@ -241,6 +270,11 @@ export namespace __common__ {
      * @description 内存限制
      */
     memoryLimit: string | null
+    /**
+     * @example 60
+     * @description 容器级空闲超时（分钟）；null 时回退全局 HEARTBEAT_TIMEOUT
+     */
+    idleTimeoutMinutes: number | null
     /**
      * @example Container failed to start
      * @description 错误消息
@@ -445,6 +479,11 @@ export namespace __common__ {
        */
       memoryLimit: string | null
       /**
+       * @example 60
+       * @description 容器级空闲超时（分钟）；null 时回退全局 HEARTBEAT_TIMEOUT
+       */
+      idleTimeoutMinutes: number | null
+      /**
        * @example Container failed to start
        * @description 错误消息
        */
@@ -563,12 +602,12 @@ export namespace __common__ {
     agentName?: string
     /**
      * @example 4
-     * @description CPU 限制（如 "2"、"4"）
+     * @description CPU 限制：数字字符串（核数，如 "2"、"0.5"）
      */
     cpuLimit?: string
     /**
      * @example 4g
-     * @description 内存限制（如 "2g"、"512m"）
+     * @description 内存限制：数字 + 单位（如 "2g"、"512m"、"1t"）
      */
     memoryLimit?: string
     /**
@@ -577,7 +616,12 @@ export namespace __common__ {
      */
     workDirectory?: string
     /**
-     * @description 当容器处于 RUNNING 状态时，修改 cpuLimit/memoryLimit 后是否立即重启生效（默认 false 仅写入 DB）
+     * @example 60
+     * @description 容器级空闲超时（分钟）：设置后该容器空闲停止按此值判定；传 null 清空回退全局 HEARTBEAT_TIMEOUT（默认 20 分钟）；不传（undefined）不修改。上限 525600（一年）
+     */
+    idleTimeoutMinutes?: number | null
+    /**
+     * @description docker update 热更新资源限制失败时，是否允许 stop + start 回退重启使其生效（默认 false 直接返回错误；回退重启会中断容器内正在进行的会话）。命名遗留：字段名取自旧行为「RUNNING 时重启生效」，现语义为「update 失败回退开关」，下次 SDK 版本迭代时计划改名 restartOnUpdateFailure
      */
     restartIfRunning?: boolean
   }
@@ -590,7 +634,50 @@ export namespace __common__ {
     id: string
   }
 
-  export interface Object {}
+  export interface SaveTourStateDto {
+    /**
+     * @example active
+     * @description 用户指引状态
+     */
+    status: EnumLists.Status1
+    /**
+     * @example save-reply
+     * @description 当前停留的步骤 id；非 active 状态传空串
+     */
+    step: string
+    /**
+     * @example 1
+     * @description 指引步骤表版本，需与服务端 TOUR_VERSION 一致
+     */
+    version: number
+    /**
+     * @example 2026-10-28T10:30:00.000Z
+     * @description 指引完成/跳过的 ISO 时间；active 状态可省略
+     */
+    finishedAt?: string
+  }
+
+  export interface TourStateResponseDto {
+    /**
+     * @example pending
+     * @description 用户指引状态；NULL/未上报时返回 pending
+     */
+    status: EnumLists.Status2
+    /**
+     * @description 当前停留的步骤 id
+     */
+    step: string
+    /**
+     * @example 1
+     * @description 指引步骤表版本；未上报时为 0
+     */
+    version: number
+    /**
+     * @example 2026-10-28T10:30:00.000Z
+     * @description 指引完成/跳过时间；未完成时为 null
+     */
+    finishedAt: string | null
+  }
 
   export interface ProjectResponseDto {
     /**
@@ -1113,6 +1200,86 @@ export namespace __common__ {
     isDefault?: boolean
   }
 
+  export interface ContainerRebuildItemDto {
+    /**
+     * @description 容器 ID
+     */
+    containerId: string
+    /**
+     * @description 容器名称
+     */
+    containerName: string
+    /**
+     * @description 所属用户 ID
+     */
+    userId: string
+    /**
+     * @example 1.18.26
+     * @description 重建前的版本
+     */
+    fromVersion: string | null
+    /**
+     * @example true
+     * @description 是否重建成功
+     */
+    success: boolean
+    /**
+     * @description 失败原因
+     */
+    error?: string
+  }
+
+  export interface CancelReleasePreviewDto {
+    /**
+     * @example true
+     * @description 当前接管状态；false 时取消接管会被拒绝（无需预览重建范围）
+     */
+    takingOver: boolean
+    /**
+     * @example 8
+     * @description 将被重建的容器数（rebuildContainers=true 时的影响范围）
+     */
+    total: number
+    /**
+     * @description 将被重建的容器清单
+     */
+    items: Array<__common__.ContainerRebuildItemDto>
+  }
+
+  export interface CancelReleaseResultDto {
+    /**
+     * @description 取消后的接管状态（恒为 false）
+     */
+    takingOver: boolean
+    /**
+     * @description 是否执行了容器重建（对应请求的 rebuildContainers）
+     */
+    rebuiltContainers: boolean
+    /**
+     * @description 重建容器总数
+     */
+    total: number
+    /**
+     * @description 重建成功数
+     */
+    succeeded: number
+    /**
+     * @description 重建失败数
+     */
+    failed: number
+    /**
+     * @description 逐容器重建结果
+     */
+    items: Array<__common__.ContainerRebuildItemDto>
+  }
+
+  export interface CancelReleaseDto {
+    /**
+     * @description 是否同时把当前运行中的容器批量重建为镜像内置版本。Docker bind mount 在容器创建时锁定且无法摘除，只有重建才能让已有容器回到镜像版本。默认 false：只改变后续新建/重建容器的行为，不触碰正在运行的容器
+     */
+    rebuildContainers?: boolean
+  }
+
   export interface ActivateResultDto {
     /**
      * @example 1.18.25
@@ -1609,15 +1776,15 @@ export namespace __common__ {
 
   export interface UploadFileResponseDto {
     /**
-     * @example https://testai.maxrocky.com/filedown/maximum-ai/feedback/user123/1-x.png?X-Amz-...
-     * @description 上传后的 MinIO 签名访问 URL（默认 1 小时有效）
+     * @example document.pdf
+     * @description 文件名
      */
-    url: string
+    filename: string
     /**
-     * @example feedback/user123/1786437212589-x.png
-     * @description MinIO 对象 key
+     * @example /workspace/uploads/document.pdf
+     * @description 文件在工作区内的完整路径
      */
-    objectKey: string
+    path: string
   }
 
   export interface InitMultipartUploadDto {
@@ -1793,6 +1960,10 @@ export namespace __common__ {
      * @description 文件已存在时是否覆盖，默认 false（不覆盖，返回 409）
      */
     overwrite?: boolean
+    /**
+     * @description 为 true 时在 filePath 处创建目录（父目录不存在时递归创建，忽略 content/overwrite，目标已存在返回 409）；缺省 false 保持新建文件语义
+     */
+    directory?: boolean
   }
 
   export interface UpdateFileDto {
@@ -2037,6 +2208,19 @@ export namespace __common__ {
      * @description 更新时间
      */
     updatedAt: string
+  }
+
+  export interface FeedbackUploadFileResponseDto {
+    /**
+     * @example https://testai.maxrocky.com/filedown/maximum-ai/feedback/user123/1-x.png?X-Amz-...
+     * @description 上传后的 MinIO 签名访问 URL（默认 1 小时有效）
+     */
+    url: string
+    /**
+     * @example feedback/user123/1786437212589-x.png
+     * @description MinIO 对象 key
+     */
+    objectKey: string
   }
 
   export interface PaginatedFeedbackListItemDto {
@@ -2418,6 +2602,159 @@ You are an opencode agent...
     pageSize: number
   }
 
+  export interface MirrorPackageEntryDto {
+    /**
+     * @example dayjs
+     * @description 包名 / 项目名 / 资源名
+     */
+    name: string
+    /**
+     * @example 1.11.19
+     * @description 精确版本（apt / cdn 条目）
+     */
+    version?: string
+    /**
+     * @example 1.11.19,1.11.23
+     * @description 全部可用版本（npm 条目）
+     */
+    versions?: Array<string>
+    /**
+     * @example 451
+     * @description 文件数（cdn 条目）
+     */
+    files?: number
+    /**
+     * @example 681693
+     * @description 总体积（字节，cdn 条目）
+     */
+    size?: number
+    /**
+     * @description 来源套件（apt 条目，如 resolute-updates）
+     */
+    suite?: string
+    /**
+     * @example /simple/dayjs/
+     * @description 进一步查询该条目详情的相对地址
+     */
+    detailUrl?: string
+  }
+
+  export interface MirrorCatalogResultDto {
+    /**
+     * @description 查询是否成功
+     */
+    ok: boolean
+    /**
+     * @description 失败原因（ok=false 时）
+     */
+    error?: string
+    /**
+     * @description 该镜像的全部可用资源
+     */
+    packages: Array<__common__.MirrorPackageEntryDto>
+  }
+
+  export interface DependencyResourcesResponseDto {
+    /**
+     * @description apt 镜像（deb 仓库）
+     */
+    apt?: {
+      /**
+       * @description 查询是否成功
+       */
+      ok: boolean
+      /**
+       * @description 失败原因（ok=false 时）
+       */
+      error?: string
+      /**
+       * @description 该镜像的全部可用资源
+       */
+      packages: Array<__common__.MirrorPackageEntryDto>
+    }
+    /**
+     * @description pip 镜像（pypiserver）
+     */
+    pip?: {
+      /**
+       * @description 查询是否成功
+       */
+      ok: boolean
+      /**
+       * @description 失败原因（ok=false 时）
+       */
+      error?: string
+      /**
+       * @description 该镜像的全部可用资源
+       */
+      packages: Array<__common__.MirrorPackageEntryDto>
+    }
+    /**
+     * @description npm 镜像（verdaccio）
+     */
+    npm?: {
+      /**
+       * @description 查询是否成功
+       */
+      ok: boolean
+      /**
+       * @description 失败原因（ok=false 时）
+       */
+      error?: string
+      /**
+       * @description 该镜像的全部可用资源
+       */
+      packages: Array<__common__.MirrorPackageEntryDto>
+    }
+    /**
+     * @description cdn 镜像（静态资源）
+     */
+    cdn?: {
+      /**
+       * @description 查询是否成功
+       */
+      ok: boolean
+      /**
+       * @description 失败原因（ok=false 时）
+       */
+      error?: string
+      /**
+       * @description 该镜像的全部可用资源
+       */
+      packages: Array<__common__.MirrorPackageEntryDto>
+    }
+  }
+
+  export interface RagflowKbEntryDto {
+    /**
+     * @example fabc6d0a871f11f1a0af5edfe649c567
+     * @description 知识库 id
+     */
+    id: string
+    /**
+     * @example GJB知识库
+     * @description 知识库名称
+     */
+    name: string
+    /**
+     * @example 11
+     * @description 文档数（> 0，空库已过滤）
+     */
+    doc_num: number
+    /**
+     * @example bge-large-zh___LocalAI@LocalAI
+     * @description embedding 模型标识（不同模型的库不能混合检索）
+     */
+    embd_id: string
+  }
+
+  export interface RagflowKbListResponseDto {
+    /**
+     * @description 知识库列表
+     */
+    kbs: Array<__common__.RagflowKbEntryDto>
+  }
+
   export interface SkillItemDto {
     /**
      * @example my-skill
@@ -2504,6 +2841,757 @@ You are an opencode agent...
      * @description 是否覆盖已存在的同名 skill 目录。默认 true（幂等更新）；false 且同名目录已存在时返回 409。
      */
     overwrite?: boolean
+  }
+
+  export interface ReadTemplateFileResponseDto {
+    /**
+     * @example opencode.jsonc
+     * @description 文件名
+     */
+    name: string
+    /**
+* @example {
+  "theme": "dark"
+}
+* @description 文件内容（UTF-8 原文；userinfo.jsonc 的 access_token 会被掩码为 ***）
+*/
+    content: string
+    /**
+     * @example true
+     * @description 文件是否存在
+     */
+    exists: boolean
+    /**
+     * @example 1024
+     * @description 文件大小（字节）
+     */
+    size: number
+    /**
+     * @example 2026-08-18T10:30:00.000Z
+     * @description 最后修改时间（ISO 8601）
+     */
+    lastModified: string | null
+  }
+
+  export interface WriteTemplateFileDto {
+    /**
+     * @example opencode.jsonc
+     * @description 模板配置文件名，只能是 AGENTS.md / opencode.jsonc / userinfo.jsonc
+     */
+    fileName: EnumLists.FileName
+    /**
+* @example {
+  "theme": "dark"
+}
+* @description 文件内容（UTF-8 文本，全量覆盖）
+*/
+    content: string
+    /**
+     * @example true
+     * @description 是否校验 JSON/JSONC 合法性（仅对 .jsonc 文件生效），默认 true
+     */
+    validateJsonc?: boolean
+  }
+
+  export interface TemplateSkillListDto {
+    /**
+     * @description 模板 skills 目录绝对路径
+     */
+    root: string
+    /**
+     * @description skill 列表
+     */
+    items: Array<Array<any>>
+  }
+
+  export interface TemplateSkillItemDto {
+    /**
+     * @example my-skill
+     * @description skill 目录名
+     */
+    dirName: string
+    /**
+     * @example my-skill
+     * @description SKILL.md frontmatter 中的 name（校验失败时为目录名）
+     */
+    name: string
+    /**
+     * @description SKILL.md frontmatter 中的 description（校验失败时为 null）
+     */
+    description: string | null
+    /**
+     * @example true
+     * @description 是否启用（未被 permission.skill deny）
+     */
+    enabled: boolean
+    /**
+     * @description 不合规原因；合规时为 null
+     */
+    issue: string | null
+  }
+
+  export interface TemplateSkillFileListDto {
+    /**
+     * @example my-skill
+     * @description skill 目录名
+     */
+    dirName: string
+    /**
+     * @description 文件清单
+     */
+    files: Array<Array<any>>
+  }
+
+  export interface TemplateSkillFileContentDto {
+    /**
+     * @example my-skill
+     * @description skill 目录名
+     */
+    dirName: string
+    /**
+     * @example SKILL.md
+     * @description 相对 skill 目录的路径
+     */
+    path: string
+    /**
+     * @description 文件内容（UTF-8 原文）
+     */
+    content: string
+    /**
+     * @example 1024
+     * @description 文件大小（字节）
+     */
+    size: number
+    /**
+     * @example 2026-08-18T10:30:00.000Z
+     * @description 最后修改时间（ISO 8601）
+     */
+    lastModified: string
+  }
+
+  export interface TemplateSkillActionDto {
+    /**
+     * @example my-skill
+     * @description skill 目录名
+     */
+    dirName: string
+    /**
+     * @description 操作后的启用状态
+     */
+    enabled?: boolean
+  }
+
+  export interface CreateTemplateSkillDto {
+    /**
+     * @example my-skill
+     * @description skill 目录名，仅允许字母数字与 . _ -
+     */
+    name: string
+    /**
+     * @description SKILL.md frontmatter 的 description；省略时用占位文案
+     */
+    description?: string
+  }
+
+  export interface WriteTemplateSkillFileDto {
+    /**
+     * @example SKILL.md
+     * @description 相对 skill 目录的文件路径
+     */
+    path: string
+    /**
+     * @description 文件内容（UTF-8 文本，全量覆盖）
+     */
+    content: string
+  }
+
+  export interface RenameTemplateSkillDto {
+    /**
+     * @example renamed-skill
+     * @description 新的 skill 目录名
+     */
+    newName: string
+  }
+
+  export interface TemplateToolListDto {
+    /**
+     * @description 模板 tools 目录绝对路径
+     */
+    root: string
+    /**
+     * @description 工具文件列表
+     */
+    items: Array<Array<any>>
+  }
+
+  export interface TemplateToolItemDto {
+    /**
+     * @example user-info.ts
+     * @description 工具文件名
+     */
+    name: string
+    /**
+     * @example 1024
+     * @description 文件大小（字节）
+     */
+    size: number
+    /**
+     * @example 2026-08-18T10:30:00.000Z
+     * @description 最后修改时间（ISO 8601）
+     */
+    lastModified: string
+  }
+
+  export interface TemplateToolContentDto {
+    /**
+     * @example user-info.ts
+     * @description 工具文件名
+     */
+    name: string
+    /**
+     * @description 文件内容（UTF-8 源码）
+     */
+    content: string
+    /**
+     * @example 1024
+     * @description 文件大小（字节）
+     */
+    size: number
+    /**
+     * @example 2026-08-18T10:30:00.000Z
+     * @description 最后修改时间（ISO 8601）
+     */
+    lastModified: string
+  }
+
+  export interface CreateTemplateToolDto {
+    /**
+* @example export const x = 1
+
+* @description 文件内容（UTF-8 源码）
+*/
+    content: string
+    /**
+     * @example user-info.ts
+     * @description 工具文件名，必须以 .ts 结尾
+     */
+    name: string
+    /**
+     * @description 同名文件已存在时是否覆盖，默认 false（返回 409）
+     */
+    overwrite?: boolean
+  }
+
+  export interface WriteTemplateToolDto {
+    /**
+* @example export const x = 1
+
+* @description 文件内容（UTF-8 源码）
+*/
+    content: string
+  }
+
+  export interface RenameTemplateToolDto {
+    /**
+     * @example renamed.ts
+     * @description 新的工具文件名，必须以 .ts 结尾
+     */
+    newName: string
+  }
+
+  export interface UpstreamProviderOptionsDto {
+    /**
+     * @example http://192.168.1.24:8020/maximum/v1
+     * @description 模型服务 baseURL
+     */
+    baseURL: string
+  }
+
+  export interface UpstreamProviderDto {
+    /**
+     * @example 智元模型
+     * @description provider 展示名
+     */
+    name: string
+    /**
+     * @example @ai-sdk/openai-compatible
+     * @description opencode 侧使用的 npm 适配器
+     */
+    npm: string
+    /**
+     * @description provider 选项
+     */
+    options: {
+      /**
+       * @example http://192.168.1.24:8020/maximum/v1
+       * @description 模型服务 baseURL
+       */
+      baseURL: string
+    }
+    /**
+     * @description 模型集合（键为上游 id）
+     */
+    models: object
+  }
+
+  export interface UpstreamModelsResponseDto {
+    /**
+     * @description provider 键名固定为 zhiyuan
+     */
+    providerKey: string
+    /**
+     * @description 转换后的 provider 配置
+     */
+    provider: {
+      /**
+       * @example 智元模型
+       * @description provider 展示名
+       */
+      name: string
+      /**
+       * @example @ai-sdk/openai-compatible
+       * @description opencode 侧使用的 npm 适配器
+       */
+      npm: string
+      /**
+       * @description provider 选项
+       */
+      options: {
+        /**
+         * @example http://192.168.1.24:8020/maximum/v1
+         * @description 模型服务 baseURL
+         */
+        baseURL: string
+        /**
+         * @example http://192.168.1.24:8020/maximum/v1
+         * @description 模型服务 baseURL
+         */
+        baseURL: string
+      }
+      /**
+       * @description 模型集合（键为上游 id）
+       */
+      models: object
+    }
+    /**
+     * @example 2
+     * @description 上游返回的模型数量
+     */
+    count: number
+    /**
+     * @example http://192.168.1.24:8020/maximum/v1/v1/models
+     * @description 上游接口地址（脱敏展示用）
+     */
+    fetchedFrom: string
+  }
+
+  export interface BatchSyncDto {
+    /**
+     * @example u1,u2
+     * @description 要下发的目标用户 ID 列表；省略时扫描 userData 下的全部用户目录
+     */
+    userIds?: Array<Array<any>>
+  }
+
+  export interface BatchSyncResultDto {
+    /**
+     * @example 3
+     * @description 目标用户总数
+     */
+    total: number
+    /**
+     * @example 2
+     * @description 成功用户数
+     */
+    succeeded: number
+    /**
+     * @example 1
+     * @description 失败用户数
+     */
+    failed: number
+    /**
+     * @description 逐用户结果
+     */
+    users: Array<Array<any>>
+  }
+
+  export interface BatchRestartDto {
+    /**
+     * @example 123e4567-e89b-12d3-a456-426614174000
+     * @description 目标容器 ID 列表；与 userIds 都不传时重启全部在库容器
+     */
+    containerIds?: Array<Array<any>>
+    /**
+     * @example u1,u2
+     * @description 目标用户 ID 列表；与 containerIds 都不传时重启全部在库容器
+     */
+    userIds?: Array<Array<any>>
+  }
+
+  export interface BatchRestartResultDto {
+    /**
+     * @example 3
+     * @description 目标容器总数
+     */
+    total: number
+    /**
+     * @example 2
+     * @description 成功数
+     */
+    succeeded: number
+    /**
+     * @description 失败数
+     */
+    failed: number
+    /**
+     * @example 1
+     * @description 跳过数
+     */
+    skipped: number
+    /**
+     * @description 逐容器结果
+     */
+    items: Array<Array<any>>
+  }
+
+  export interface ModelPushSyncResultDto {
+    /**
+     * @description 模板 opencode.jsonc 是否有变化（false 表示与清单一致、未写入）
+     */
+    templateChanged: boolean
+    /**
+     * @example 3
+     * @description 本次同步的模型数量
+     */
+    modelsCount: number
+    /**
+     * @description 逐用户下发明细（含 unchanged 无变化标记）
+     */
+    sync: {
+      /**
+       * @example 3
+       * @description 目标用户总数
+       */
+      total: number
+      /**
+       * @example 2
+       * @description 成功用户数
+       */
+      succeeded: number
+      /**
+       * @example 1
+       * @description 失败用户数
+       */
+      failed: number
+      /**
+       * @description 逐用户结果
+       */
+      users: Array<Array<any>>
+    }
+    /**
+     * @description 逐容器热重载明细（只对 opencode.jsonc 有变化的用户容器执行）
+     */
+    hotReload: {
+      /**
+       * @example 3
+       * @description 目标容器总数
+       */
+      total: number
+      /**
+       * @example 2
+       * @description 成功数
+       */
+      succeeded: number
+      /**
+       * @description 失败数
+       */
+      failed: number
+      /**
+       * @example 1
+       * @description 跳过数
+       */
+      skipped: number
+      /**
+       * @description 逐容器结果
+       */
+      items: Array<Array<any>>
+    }
+  }
+
+  export interface ModelPushSyncDto {
+    /**
+     * @example [object Object]
+     * @description 模型清单（api_management /v1/models 原生结构）
+     */
+    models: object
+    /**
+     * @example u1,u2
+     * @description 目标用户 ID 列表；省略时下发到 userData 下的全部用户
+     */
+    userIds?: Array<Array<any>>
+    /**
+     * @example http://192.168.1.24:8020/maximum/v1
+     * @description opencode 容器访问模型网关的 baseURL；非空则写入 opencode.jsonc 的 provider.zhiyuan.options.baseURL
+     */
+    providerBaseUrl?: string
+  }
+
+  export interface CreateWorkspaceData {
+    /**
+     * @example ws_yaCwlbmofYUZQdWIxvUjBhl0BMwma5oKCIWs...
+     * @description 加密工作目录凭证，后续上传/任务/查询接口的凭据
+     */
+    workspace_path: string
+  }
+
+  export interface CreateWorkspaceResponse {
+    /**
+     * @example 200
+     * @description 200 成功；非 200 为业务错误码
+     */
+    code: number
+    /**
+     * @example success
+     */
+    message: string
+    data: __common__.CreateWorkspaceData
+  }
+
+  export interface UploadFileData {
+    /**
+     * @example report.pdf
+     * @description 实际落盘文件名
+     */
+    fileName: string
+    /**
+     * @example 123456
+     * @description 文件字节数
+     */
+    size: number
+  }
+
+  export interface UploadFileResponse {
+    /**
+     * @example 200
+     * @description 200 成功；非 200 为业务错误码
+     */
+    code: number
+    /**
+     * @example success
+     */
+    message: string
+    data: __common__.UploadFileData
+  }
+
+  export interface CreateTaskDto {
+    /**
+     * @example 统计当前目录下的文件数量
+     * @description 用户提示词
+     */
+    prompt: string
+    /**
+     * @example 20
+     * @description 会话保留时长（分钟），自会话结束起算；默认 20，最大 120，0 表示会话结束后立即销毁
+     */
+    retentionMinutes?: number
+    /**
+     * @description 加密工作目录凭证；缺省时自动创建新工作目录
+     */
+    workspacePath?: string
+    /**
+     * @example zhiyuan/deepseek-v4-flash
+     * @description 指定模型，格式 providerID/modelID（如 zhiyuan/deepseek-v4-flash）；缺省用容器默认模型
+     */
+    model?: string
+    /**
+     * @example high
+     * @description 思考深度档位（模型 variants 中定义的名称，如 none/low/medium/high/xhigh/max/thinking）；缺省用模型默认
+     */
+    reasoningEffort?: string
+    /**
+     * @example 123e4567-e89b-12d3-a456-426614174000
+     * @description 提示词模板 ID（UUID）；携带时将模板内容拼接到 prompt 之前
+     */
+    templateId?: string
+    /**
+     * @example [object Object]
+     * @description 模板占位符参数映射，键为 $1 等占位符名；仅配合 templateId 使用
+     */
+    templateParams?: object
+  }
+
+  export interface CreateTaskData {
+    /**
+     * @example 9de30f2e-4a5b-4468-a852-b7f8e9a3d564
+     * @description 本次任务 id（uuid 格式），用于结果查询；结果文件名 {task_id}.json
+     */
+    task_id: string
+    /**
+     * @example ws_yaCwlbmofYUZQdWIxvUjBhl0BMwma5oKCIWs...
+     * @description 本次任务使用的加密工作目录凭证
+     */
+    workspace_path: string
+  }
+
+  export interface CreateTaskResponse {
+    /**
+     * @example 200
+     * @description 200 成功；非 200 为业务错误码
+     */
+    code: number
+    /**
+     * @example success
+     */
+    message: string
+    data: __common__.CreateTaskData
+  }
+
+  export interface TaskResultResponse {
+    /**
+     * @example 200
+     * @description 200 成功；非 200 为业务错误码
+     */
+    code: number
+    /**
+     * @example success
+     */
+    message: string
+    /**
+     * @example [object Object]
+     * @description 任务完成后直接返回结果文件 {task_id}.json 的 JSON 内容（不包裹外壳）；执行中返回 { status: "running" }；文件缺失/非法 JSON/超限时返回 { status, message } 默认信息
+     */
+    data: object
+  }
+
+  export interface CreateTemplateDto {
+    /**
+     * @example 发票要素提取
+     * @description 模板名称
+     */
+    name: string
+    /**
+     * @example 请提取以下票据的要素：$1
+     * @description 提示词内容（可含 $1/$2 等占位符）
+     */
+    content: string
+    /**
+     * @description 模板描述
+     */
+    description?: string
+  }
+
+  export interface PromptTemplateData {
+    /**
+     * @example 123e4567-e89b-12d3-a456-426614174000
+     * @description 模板 ID（UUID）
+     */
+    id: string
+    /**
+     * @example 发票要素提取
+     * @description 模板名称
+     */
+    name: string
+    /**
+     * @example 请提取以下票据的要素：$1
+     * @description 提示词内容（可含 $1/$2 占位符）
+     */
+    content: string
+    /**
+     * @example 增值税发票通用规则
+     * @description 模板描述
+     */
+    description?: string | null
+    /**
+     * @example 2026-10-26T08:00:00.000Z
+     * @description 创建时间
+     */
+    createdAt: string
+    /**
+     * @example 2026-10-26T09:00:00.000Z
+     * @description 更新时间
+     */
+    updatedAt: string
+  }
+
+  export interface PromptTemplateResponse {
+    /**
+     * @example 200
+     * @description 200 成功；非 200 为业务错误码
+     */
+    code: number
+    /**
+     * @example success
+     */
+    message: string
+    data: __common__.PromptTemplateData
+  }
+
+  export interface PromptTemplateListResponse {
+    /**
+     * @example 200
+     * @description 200 成功；非 200 为业务错误码
+     */
+    code: number
+    /**
+     * @example success
+     */
+    message: string
+    /**
+     * @description 当前 uid 名下全部模板，按更新时间倒序
+     */
+    data: Array<__common__.PromptTemplateData>
+  }
+
+  export interface UpdateTemplateDto {
+    /**
+     * @description 模板名称
+     */
+    name?: string
+    /**
+     * @description 提示词内容（可含 $1/$2 等占位符）
+     */
+    content?: string
+    /**
+     * @description 模板描述
+     */
+    description?: string
+  }
+
+  export interface DeleteTemplateData {
+    /**
+     * @example 123e4567-e89b-12d3-a456-426614174000
+     * @description 已删除的模板 ID
+     */
+    id: string
+  }
+
+  export interface DeleteTemplateResponse {
+    /**
+     * @example 200
+     * @description 200 成功；非 200 为业务错误码
+     */
+    code: number
+    /**
+     * @example success
+     */
+    message: string
+    data: __common__.DeleteTemplateData
+  }
+
+  export interface ApiFailResponse {
+    /**
+     * @example 400
+     * @description 业务错误码（非 200）：400/401/403/404/410
+     */
+    code: number
+    /**
+     * @example 无效的 workspace_path
+     */
+    message: string
+    /**
+     * @description 恒为 null
+     */
+    data: null | null
   }
 
   export interface LogsT {
@@ -2712,46 +3800,6 @@ export namespace Containers {
     id: string
   }
 
-  export interface ContainersControllerRestartRes {
-    /**
-     * @example 200
-     */
-    code: number
-    /**
-     * @example success
-     */
-    message: string
-    data: Object
-  }
-
-  export interface ContainersControllerRestartParams {
-    /**
-     * @description 容器的唯一标识符 (UUID)
-     */
-    id: string
-    authorization: string
-  }
-
-  export interface ContainersControllerHotReloadRes {
-    /**
-     * @example 200
-     */
-    code: number
-    /**
-     * @example success
-     */
-    message: string
-    data: Object
-  }
-
-  export interface ContainersControllerHotReloadParams {
-    /**
-     * @description 容器的唯一标识符 (UUID)
-     */
-    id: string
-    authorization: string
-  }
-
   export interface ContainersCreateWorkspaceFolderRes {
     /**
      * @example 200
@@ -2795,6 +3843,65 @@ export namespace Containers {
     id: string
   }
 
+  export interface ContainersControllerGetTourStateRes {
+    /**
+     * @example 200
+     */
+    code: number
+    /**
+     * @example success
+     */
+    message: string
+    data: __common__.TourStateResponseDto
+  }
+
+  export interface ContainersControllerGetTourStateParams {
+    /**
+     * @description 容器的唯一标识符 (UUID)
+     */
+    id: string
+  }
+
+  export interface ContainersControllerSaveTourStateRes {
+    /**
+     * @example 200
+     */
+    code: number
+    /**
+     * @example success
+     */
+    message: string
+    data: __common__.TourStateResponseDto
+  }
+
+  export interface ContainersControllerSaveTourStateParams {
+    /**
+     * @description 容器的唯一标识符 (UUID)
+     */
+    id: string
+  }
+
+  export interface ContainersControllerSaveTourStateBody extends __common__.SaveTourStateDto {}
+
+  export interface ContainersControllerResetTourStateRes {
+    /**
+     * @example 200
+     */
+    code: number
+    /**
+     * @example success
+     */
+    message: string
+    data: __common__.TourStateResponseDto
+  }
+
+  export interface ContainersControllerResetTourStateParams {
+    /**
+     * @description 容器的唯一标识符 (UUID)
+     */
+    id: string
+  }
+
   export type RContainersGet = Promise<[any, Containers.ContainersGetRes["data"], Containers.ContainersGetRes]>
   export type RContainersStop = Promise<[any, Containers.ContainersStopRes["data"], Containers.ContainersStopRes]>
   export type RContainersStart = Promise<[any, Containers.ContainersStartRes["data"], Containers.ContainersStartRes]>
@@ -2810,12 +3917,6 @@ export namespace Containers {
   export type RContainersControllerUpdate = Promise<
     [any, Containers.ContainersControllerUpdateRes["data"], Containers.ContainersControllerUpdateRes]
   >
-  export type RContainersControllerRestart = Promise<
-    [any, Containers.ContainersControllerRestartRes["data"], Containers.ContainersControllerRestartRes]
-  >
-  export type RContainersControllerHotReload = Promise<
-    [any, Containers.ContainersControllerHotReloadRes["data"], Containers.ContainersControllerHotReloadRes]
-  >
   export type ContainersCreateWorkspaceFolderParams1 = ContainersCreateWorkspaceFolderParams &
     __common__.CreateWorkspaceFolderDto
 
@@ -2824,6 +3925,18 @@ export namespace Containers {
   >
   export type RContainersGetAvailableWorkspace = Promise<
     [any, Containers.ContainersGetAvailableWorkspaceRes["data"], Containers.ContainersGetAvailableWorkspaceRes]
+  >
+  export type RContainersControllerGetTourState = Promise<
+    [any, Containers.ContainersControllerGetTourStateRes["data"], Containers.ContainersControllerGetTourStateRes]
+  >
+  export type ContainersControllerSaveTourStateParams1 = ContainersControllerSaveTourStateParams &
+    __common__.SaveTourStateDto
+
+  export type RContainersControllerSaveTourState = Promise<
+    [any, Containers.ContainersControllerSaveTourStateRes["data"], Containers.ContainersControllerSaveTourStateRes]
+  >
+  export type RContainersControllerResetTourState = Promise<
+    [any, Containers.ContainersControllerResetTourStateRes["data"], Containers.ContainersControllerResetTourStateRes]
   >
 }
 
@@ -3144,6 +4257,10 @@ export namespace OpencodeVersions {
     message: string
     data: {
       enabled?: boolean
+      /**
+       * @description 受管二进制是否接管容器版本来源；false 时新建/重建容器使用镜像内置版本
+       */
+      takingOver?: boolean
       versionsDir?: string
       hostDir?: string
       mountSource?: string | null
@@ -3170,6 +4287,36 @@ export namespace OpencodeVersions {
   }
 
   export interface OpencodeVersionControllerRepairCurrentParams {}
+
+  export interface OpencodeVersionControllerPreviewCancelRes {
+    /**
+     * @example 200
+     */
+    code: number
+    /**
+     * @example success
+     */
+    message: string
+    data: __common__.CancelReleasePreviewDto
+  }
+
+  export interface OpencodeVersionControllerPreviewCancelParams {}
+
+  export interface OpencodeVersionControllerCancelReleaseRes {
+    /**
+     * @example 200
+     */
+    code: number
+    /**
+     * @example success
+     */
+    message: string
+    data: __common__.CancelReleaseResultDto
+  }
+
+  export interface OpencodeVersionControllerCancelReleaseParams {}
+
+  export interface OpencodeVersionControllerCancelReleaseBody extends __common__.CancelReleaseDto {}
 
   export interface OpencodeVersionControllerActivateRes {
     /**
@@ -3435,6 +4582,20 @@ export namespace OpencodeVersions {
       any,
       OpencodeVersions.OpencodeVersionControllerRepairCurrentRes["data"],
       OpencodeVersions.OpencodeVersionControllerRepairCurrentRes,
+    ]
+  >
+  export type ROpencodeVersionControllerPreviewCancel = Promise<
+    [
+      any,
+      OpencodeVersions.OpencodeVersionControllerPreviewCancelRes["data"],
+      OpencodeVersions.OpencodeVersionControllerPreviewCancelRes,
+    ]
+  >
+  export type ROpencodeVersionControllerCancelRelease = Promise<
+    [
+      any,
+      OpencodeVersions.OpencodeVersionControllerCancelReleaseRes["data"],
+      OpencodeVersions.OpencodeVersionControllerCancelReleaseRes,
     ]
   >
   export type ROpencodeVersionControllerCompleteChunked = Promise<
@@ -4598,7 +5759,7 @@ export namespace Feedback {
      * @example success
      */
     message: string
-    data: __common__.UploadFileResponseDto
+    data: __common__.FeedbackUploadFileResponseDto
   }
 
   export interface FeedbackControllerUploadFileParams {}
@@ -5023,6 +6184,57 @@ export namespace DependencyRequests {
   >
 }
 
+export namespace DependencyResources {
+  export interface DependencyResourceControllerQueryRes {
+    /**
+     * @example 200
+     */
+    code: number
+    /**
+     * @example success
+     */
+    message: string
+    data: __common__.DependencyResourcesResponseDto
+  }
+
+  export interface DependencyResourceControllerQueryParams {
+    /**
+     * @description 过滤单一镜像；缺省返回四类镜像聚合结果
+     */
+    mirror?: EnumLists.Mirror
+  }
+
+  export type RDependencyResourceControllerQuery = Promise<
+    [
+      any,
+      DependencyResources.DependencyResourceControllerQueryRes["data"],
+      DependencyResources.DependencyResourceControllerQueryRes,
+    ]
+  >
+}
+
+export namespace RagflowKb {
+  export interface RagflowKbControllerListRes {
+    /**
+     * @example 200
+     */
+    code: number
+    /**
+     * @example success
+     */
+    message: string
+    data: __common__.RagflowKbListResponseDto
+  }
+
+  export interface RagflowKbControllerListParams {
+    authorization: string
+  }
+
+  export type RRagflowKbControllerList = Promise<
+    [any, RagflowKb.RagflowKbControllerListRes["data"], RagflowKb.RagflowKbControllerListRes]
+  >
+}
+
 export namespace Skills {
   export interface SkillControllerListRes {
     /**
@@ -5157,5 +6369,656 @@ export namespace Skills {
   >
   export type RSkillControllerImportArchive = Promise<
     [any, Skills.SkillControllerImportArchiveRes["data"], Skills.SkillControllerImportArchiveRes]
+  >
+}
+
+export namespace AdminTemplate {
+  export interface TemplateFilesControllerReadRes {
+    /**
+     * @example 200
+     */
+    code: number
+    /**
+     * @example success
+     */
+    message: string
+    data: __common__.ReadTemplateFileResponseDto
+  }
+
+  export interface TemplateFilesControllerReadParams {
+    fileName: EnumLists.FileName
+  }
+
+  export interface TemplateFilesControllerWriteRes {
+    /**
+     * @example 200
+     */
+    code: number
+    /**
+     * @example success
+     */
+    message: string
+    data: __common__.ReadTemplateFileResponseDto
+  }
+
+  export interface TemplateFilesControllerWriteParams {}
+
+  export interface TemplateFilesControllerWriteBody extends __common__.WriteTemplateFileDto {}
+
+  export interface TemplateSkillControllerListRes {
+    /**
+     * @example 200
+     */
+    code: number
+    /**
+     * @example success
+     */
+    message: string
+    data: __common__.TemplateSkillListDto
+  }
+
+  export interface TemplateSkillControllerListParams {}
+
+  export interface TemplateSkillControllerCreateRes {
+    /**
+     * @example 200
+     */
+    code: number
+    /**
+     * @example success
+     */
+    message: string
+    data: __common__.TemplateSkillItemDto
+  }
+
+  export interface TemplateSkillControllerCreateParams {}
+
+  export interface TemplateSkillControllerCreateBody extends __common__.CreateTemplateSkillDto {}
+
+  export interface TemplateSkillControllerImportArchiveRes {
+    /**
+     * @example 200
+     */
+    code: number
+    /**
+     * @example success
+     */
+    message: string
+    data: __common__.TemplateSkillItemDto
+  }
+
+  export interface TemplateSkillControllerImportArchiveParams {}
+
+  export interface TemplateSkillControllerImportArchiveBody {
+    /**
+     * @description skill 压缩包
+     */
+    file: File
+    /**
+     * @description 是否覆盖同名 skill，默认 true；false 且已存在时返回 409
+     */
+    overwrite?: boolean
+  }
+
+  export interface TemplateSkillControllerListFilesRes {
+    /**
+     * @example 200
+     */
+    code: number
+    /**
+     * @example success
+     */
+    message: string
+    data: __common__.TemplateSkillFileListDto
+  }
+
+  export interface TemplateSkillControllerListFilesParams {
+    /**
+     * @description skill 目录名
+     */
+    name: string
+  }
+
+  export interface TemplateSkillControllerUploadFileRes {
+    /**
+     * @example 200
+     */
+    code: number
+    /**
+     * @example success
+     */
+    message: string
+    data: { dirName?: string; path?: string }
+  }
+
+  export interface TemplateSkillControllerUploadFileParams {
+    /**
+     * @description skill 目录名
+     */
+    name: string
+    /**
+     * @description 目标相对路径（以 / 结尾时视为目录）
+     */
+    path: string
+  }
+
+  export interface TemplateSkillControllerDeleteFileRes {
+    /**
+     * @example 200
+     */
+    code: number
+    /**
+     * @example success
+     */
+    message: string
+    data: { dirName?: string; path?: string }
+  }
+
+  export interface TemplateSkillControllerDeleteFileParams {
+    /**
+     * @description skill 目录名
+     */
+    name: string
+    /**
+     * @description 相对 skill 目录的路径
+     */
+    path: string
+  }
+
+  export interface TemplateSkillControllerReadFileRes {
+    /**
+     * @example 200
+     */
+    code: number
+    /**
+     * @example success
+     */
+    message: string
+    data: __common__.TemplateSkillFileContentDto
+  }
+
+  export interface TemplateSkillControllerReadFileParams {
+    /**
+     * @description skill 目录名
+     */
+    name: string
+    /**
+     * @description 相对 skill 目录的路径
+     */
+    path: string
+  }
+
+  export interface TemplateSkillControllerWriteFileRes {
+    /**
+     * @example 200
+     */
+    code: number
+    /**
+     * @example success
+     */
+    message: string
+    data: __common__.TemplateSkillFileContentDto
+  }
+
+  export interface TemplateSkillControllerWriteFileParams {
+    /**
+     * @description skill 目录名
+     */
+    name: string
+  }
+
+  /**
+   * @description 含 path 与 content
+   */
+  export interface TemplateSkillControllerWriteFileBody extends __common__.WriteTemplateSkillFileDto {}
+
+  export interface TemplateSkillControllerRenameRes {
+    /**
+     * @example 200
+     */
+    code: number
+    /**
+     * @example success
+     */
+    message: string
+    data: __common__.TemplateSkillActionDto
+  }
+
+  export interface TemplateSkillControllerRenameParams {
+    /**
+     * @description 原 skill 目录名
+     */
+    name: string
+  }
+
+  export interface TemplateSkillControllerRenameBody extends __common__.RenameTemplateSkillDto {}
+
+  export interface TemplateSkillControllerDisableRes {
+    /**
+     * @example 200
+     */
+    code: number
+    /**
+     * @example success
+     */
+    message: string
+    data: __common__.TemplateSkillActionDto
+  }
+
+  export interface TemplateSkillControllerDisableParams {
+    /**
+     * @description skill 目录名
+     */
+    name: string
+  }
+
+  export interface TemplateSkillControllerEnableRes {
+    /**
+     * @example 200
+     */
+    code: number
+    /**
+     * @example success
+     */
+    message: string
+    data: __common__.TemplateSkillActionDto
+  }
+
+  export interface TemplateSkillControllerEnableParams {
+    /**
+     * @description skill 目录名
+     */
+    name: string
+  }
+
+  export interface TemplateSkillControllerRemoveRes {
+    /**
+     * @example 200
+     */
+    code: number
+    /**
+     * @example success
+     */
+    message: string
+    data: __common__.TemplateSkillActionDto
+  }
+
+  export interface TemplateSkillControllerRemoveParams {
+    /**
+     * @description skill 目录名
+     */
+    name: string
+  }
+
+  export interface TemplateToolControllerListRes {
+    /**
+     * @example 200
+     */
+    code: number
+    /**
+     * @example success
+     */
+    message: string
+    data: __common__.TemplateToolListDto
+  }
+
+  export interface TemplateToolControllerListParams {}
+
+  export interface TemplateToolControllerCreateRes {
+    /**
+     * @example 200
+     */
+    code: number
+    /**
+     * @example success
+     */
+    message: string
+    data: __common__.TemplateToolContentDto
+  }
+
+  export interface TemplateToolControllerCreateParams {}
+
+  export interface TemplateToolControllerCreateBody extends __common__.CreateTemplateToolDto {}
+
+  export interface TemplateToolControllerReadRes {
+    /**
+     * @example 200
+     */
+    code: number
+    /**
+     * @example success
+     */
+    message: string
+    data: __common__.TemplateToolContentDto
+  }
+
+  export interface TemplateToolControllerReadParams {
+    /**
+     * @description 工具文件名（.ts）
+     */
+    name: string
+  }
+
+  export interface TemplateToolControllerWriteRes {
+    /**
+     * @example 200
+     */
+    code: number
+    /**
+     * @example success
+     */
+    message: string
+    data: __common__.TemplateToolContentDto
+  }
+
+  export interface TemplateToolControllerWriteParams {
+    /**
+     * @description 工具文件名（.ts）
+     */
+    name: string
+  }
+
+  export interface TemplateToolControllerWriteBody extends __common__.WriteTemplateToolDto {}
+
+  export interface TemplateToolControllerRemoveRes {
+    /**
+     * @example 200
+     */
+    code: number
+    /**
+     * @example success
+     */
+    message: string
+    data: { name?: string }
+  }
+
+  export interface TemplateToolControllerRemoveParams {
+    /**
+     * @description 工具文件名（.ts）
+     */
+    name: string
+  }
+
+  export interface TemplateToolControllerRenameRes {
+    /**
+     * @example 200
+     */
+    code: number
+    /**
+     * @example success
+     */
+    message: string
+    data: { name?: string }
+  }
+
+  export interface TemplateToolControllerRenameParams {
+    /**
+     * @description 原工具文件名
+     */
+    name: string
+  }
+
+  export interface TemplateToolControllerRenameBody extends __common__.RenameTemplateToolDto {}
+
+  export interface UpstreamModelControllerFetchRes {
+    /**
+     * @example 200
+     */
+    code: number
+    /**
+     * @example success
+     */
+    message: string
+    data: __common__.UpstreamModelsResponseDto
+  }
+
+  export interface UpstreamModelControllerFetchParams {
+    authorization: string
+  }
+
+  export interface AdminBatchControllerSyncConfigRes {
+    /**
+     * @example 200
+     */
+    code: number
+    /**
+     * @example success
+     */
+    message: string
+    data: __common__.BatchSyncResultDto
+  }
+
+  export interface AdminBatchControllerSyncConfigParams {}
+
+  export interface AdminBatchControllerSyncConfigBody extends __common__.BatchSyncDto {}
+
+  export interface AdminBatchControllerRestartContainersRes {
+    /**
+     * @example 200
+     */
+    code: number
+    /**
+     * @example success
+     */
+    message: string
+    data: __common__.BatchRestartResultDto
+  }
+
+  export interface AdminBatchControllerRestartContainersParams {
+    authorization: string
+  }
+
+  export interface AdminBatchControllerRestartContainersBody extends __common__.BatchRestartDto {}
+
+  export interface ModelPushSyncControllerRes {
+    /**
+     * @example 200
+     */
+    code: number
+    /**
+     * @example success
+     */
+    message: string
+    data: __common__.ModelPushSyncResultDto
+  }
+
+  export interface ModelPushSyncControllerParams {}
+
+  export interface ModelPushSyncControllerBody extends __common__.ModelPushSyncDto {}
+
+  export type RModelPushSyncController = Promise<
+    [any, AdminTemplate.ModelPushSyncControllerRes["data"], AdminTemplate.ModelPushSyncControllerRes]
+  >
+  export type RTemplateToolControllerList = Promise<
+    [any, AdminTemplate.TemplateToolControllerListRes["data"], AdminTemplate.TemplateToolControllerListRes]
+  >
+  export type RTemplateToolControllerRead = Promise<
+    [any, AdminTemplate.TemplateToolControllerReadRes["data"], AdminTemplate.TemplateToolControllerReadRes]
+  >
+  export type RTemplateFilesControllerRead = Promise<
+    [any, AdminTemplate.TemplateFilesControllerReadRes["data"], AdminTemplate.TemplateFilesControllerReadRes]
+  >
+  export type RTemplateSkillControllerList = Promise<
+    [any, AdminTemplate.TemplateSkillControllerListRes["data"], AdminTemplate.TemplateSkillControllerListRes]
+  >
+  export type TemplateToolControllerWriteParams1 = TemplateToolControllerWriteParams & __common__.WriteTemplateToolDto
+
+  export type RTemplateToolControllerWrite = Promise<
+    [any, AdminTemplate.TemplateToolControllerWriteRes["data"], AdminTemplate.TemplateToolControllerWriteRes]
+  >
+  export type RTemplateFilesControllerWrite = Promise<
+    [any, AdminTemplate.TemplateFilesControllerWriteRes["data"], AdminTemplate.TemplateFilesControllerWriteRes]
+  >
+  export type RTemplateToolControllerCreate = Promise<
+    [any, AdminTemplate.TemplateToolControllerCreateRes["data"], AdminTemplate.TemplateToolControllerCreateRes]
+  >
+  export type RTemplateToolControllerRemove = Promise<
+    [any, AdminTemplate.TemplateToolControllerRemoveRes["data"], AdminTemplate.TemplateToolControllerRemoveRes]
+  >
+  export type TemplateToolControllerRenameParams1 = TemplateToolControllerRenameParams &
+    __common__.RenameTemplateToolDto
+
+  export type RTemplateToolControllerRename = Promise<
+    [any, AdminTemplate.TemplateToolControllerRenameRes["data"], AdminTemplate.TemplateToolControllerRenameRes]
+  >
+  export type RUpstreamModelControllerFetch = Promise<
+    [any, AdminTemplate.UpstreamModelControllerFetchRes["data"], AdminTemplate.UpstreamModelControllerFetchRes]
+  >
+  export type RTemplateSkillControllerCreate = Promise<
+    [any, AdminTemplate.TemplateSkillControllerCreateRes["data"], AdminTemplate.TemplateSkillControllerCreateRes]
+  >
+  export type TemplateSkillControllerRenameParams1 = TemplateSkillControllerRenameParams &
+    __common__.RenameTemplateSkillDto
+
+  export type RTemplateSkillControllerRename = Promise<
+    [any, AdminTemplate.TemplateSkillControllerRenameRes["data"], AdminTemplate.TemplateSkillControllerRenameRes]
+  >
+  export type RTemplateSkillControllerEnable = Promise<
+    [any, AdminTemplate.TemplateSkillControllerEnableRes["data"], AdminTemplate.TemplateSkillControllerEnableRes]
+  >
+  export type RTemplateSkillControllerRemove = Promise<
+    [any, AdminTemplate.TemplateSkillControllerRemoveRes["data"], AdminTemplate.TemplateSkillControllerRemoveRes]
+  >
+  export type RTemplateSkillControllerDisable = Promise<
+    [any, AdminTemplate.TemplateSkillControllerDisableRes["data"], AdminTemplate.TemplateSkillControllerDisableRes]
+  >
+  export type RAdminBatchControllerSyncConfig = Promise<
+    [any, AdminTemplate.AdminBatchControllerSyncConfigRes["data"], AdminTemplate.AdminBatchControllerSyncConfigRes]
+  >
+  export type RTemplateSkillControllerReadFile = Promise<
+    [any, AdminTemplate.TemplateSkillControllerReadFileRes["data"], AdminTemplate.TemplateSkillControllerReadFileRes]
+  >
+  export type RTemplateSkillControllerListFiles = Promise<
+    [any, AdminTemplate.TemplateSkillControllerListFilesRes["data"], AdminTemplate.TemplateSkillControllerListFilesRes]
+  >
+  export type TemplateSkillControllerWriteFileParams1 = TemplateSkillControllerWriteFileParams &
+    __common__.WriteTemplateSkillFileDto
+
+  export type RTemplateSkillControllerWriteFile = Promise<
+    [any, AdminTemplate.TemplateSkillControllerWriteFileRes["data"], AdminTemplate.TemplateSkillControllerWriteFileRes]
+  >
+  export type RTemplateSkillControllerUploadFile = Promise<
+    [
+      any,
+      AdminTemplate.TemplateSkillControllerUploadFileRes["data"],
+      AdminTemplate.TemplateSkillControllerUploadFileRes,
+    ]
+  >
+  export type RTemplateSkillControllerDeleteFile = Promise<
+    [
+      any,
+      AdminTemplate.TemplateSkillControllerDeleteFileRes["data"],
+      AdminTemplate.TemplateSkillControllerDeleteFileRes,
+    ]
+  >
+  export type RTemplateSkillControllerImportArchive = Promise<
+    [
+      any,
+      AdminTemplate.TemplateSkillControllerImportArchiveRes["data"],
+      AdminTemplate.TemplateSkillControllerImportArchiveRes,
+    ]
+  >
+  export type AdminBatchControllerRestartContainersParams1 = AdminBatchControllerRestartContainersParams &
+    __common__.BatchRestartDto
+
+  export type RAdminBatchControllerRestartContainers = Promise<
+    [
+      any,
+      AdminTemplate.AdminBatchControllerRestartContainersRes["data"],
+      AdminTemplate.AdminBatchControllerRestartContainersRes,
+    ]
+  >
+}
+
+export namespace AgentApi {
+  export interface AgentApiControllerCreateWorkspaceRes extends __common__.CreateWorkspaceResponse {}
+
+  export interface AgentApiControllerCreateWorkspaceParams {}
+
+  export interface AgentApiControllerUploadFileRes extends __common__.UploadFileResponse {}
+
+  export interface AgentApiControllerUploadFileParams {}
+
+  export interface AgentApiControllerUploadFileBody {
+    file: File
+    workspace_path: string
+    /**
+     * @description 可选，工作目录内相对子目录
+     */
+    targetDir?: string
+  }
+
+  export interface AgentApiControllerCreateTaskRes extends __common__.CreateTaskResponse {}
+
+  export interface AgentApiControllerCreateTaskParams {}
+
+  export interface AgentApiControllerCreateTaskBody extends __common__.CreateTaskDto {}
+
+  export interface AgentApiControllerGetTaskRes extends __common__.TaskResultResponse {}
+
+  export interface AgentApiControllerGetTaskParams {
+    taskId: string
+    workspace_path: string
+  }
+
+  export interface PromptTemplateControllerListRes extends __common__.PromptTemplateListResponse {}
+
+  export interface PromptTemplateControllerListParams {}
+
+  export interface PromptTemplateControllerCreateRes extends __common__.PromptTemplateResponse {}
+
+  export interface PromptTemplateControllerCreateParams {}
+
+  export interface PromptTemplateControllerCreateBody extends __common__.CreateTemplateDto {}
+
+  export interface PromptTemplateControllerGetRes extends __common__.PromptTemplateResponse {}
+
+  export interface PromptTemplateControllerGetParams {
+    id: string
+  }
+
+  export interface PromptTemplateControllerRemoveRes extends __common__.DeleteTemplateResponse {}
+
+  export interface PromptTemplateControllerRemoveParams {
+    id: string
+  }
+
+  export interface PromptTemplateControllerUpdateRes extends __common__.PromptTemplateResponse {}
+
+  export interface PromptTemplateControllerUpdateParams {
+    id: string
+  }
+
+  export interface PromptTemplateControllerUpdateBody extends __common__.UpdateTemplateDto {}
+
+  export type RAgentApiControllerGetTask = Promise<
+    [any, __common__.TaskResultResponse["data"], __common__.TaskResultResponse]
+  >
+  export type RPromptTemplateControllerGet = Promise<
+    [any, __common__.PromptTemplateResponse["data"], __common__.PromptTemplateResponse]
+  >
+  export type RAgentApiControllerUploadFile = Promise<
+    [any, __common__.UploadFileResponse["data"], __common__.UploadFileResponse]
+  >
+  export type RAgentApiControllerCreateTask = Promise<
+    [any, __common__.CreateTaskResponse["data"], __common__.CreateTaskResponse]
+  >
+  export type RPromptTemplateControllerList = Promise<
+    [any, __common__.PromptTemplateListResponse["data"], __common__.PromptTemplateListResponse]
+  >
+  export type RPromptTemplateControllerCreate = Promise<
+    [any, __common__.PromptTemplateResponse["data"], __common__.PromptTemplateResponse]
+  >
+  export type RPromptTemplateControllerRemove = Promise<
+    [any, __common__.DeleteTemplateResponse["data"], __common__.DeleteTemplateResponse]
+  >
+  export type PromptTemplateControllerUpdateParams1 = PromptTemplateControllerUpdateParams &
+    __common__.UpdateTemplateDto
+
+  export type RPromptTemplateControllerUpdate = Promise<
+    [any, __common__.PromptTemplateResponse["data"], __common__.PromptTemplateResponse]
+  >
+  export type RAgentApiControllerCreateWorkspace = Promise<
+    [any, __common__.CreateWorkspaceResponse["data"], __common__.CreateWorkspaceResponse]
   >
 }

@@ -85,7 +85,7 @@ export default class OpencodeVersions extends ApiClient {
 
   /**
    * @summary 诊断 opencode 版本仓库状态
-   * @description 返回版本管理是否启用、固定路径文件是否存在、是文件还是目录、当前激活版本，以及无法识别激活版本时的具体原因。用于排查容器挂载失败与「当前为 无」等问题。
+   * @description 返回版本管理是否启用、是否处于接管状态、固定路径文件是否存在、是文件还是目录、当前激活版本，以及无法识别激活版本时的具体原因。用于排查容器挂载失败、「当前为 无」与「新建容器未使用受管版本」等问题。
    */
   opencodeVersionControllerDiagnose() {
     const url = "/opencode-versions/diagnose"
@@ -196,6 +196,28 @@ export default class OpencodeVersions extends ApiClient {
     const url = "/opencode-versions/repair-current"
     const config: DocReqConfig = { url, method: "post" }
     return this.request<types.ROpencodeVersionControllerRepairCurrent>(config)
+  }
+
+  /**
+   * @summary 预览取消接管的影响范围
+   * @description 返回当前接管状态与将被重建的容器清单（即 rebuildContainers=true 时的影响范围），不执行任何状态变更或容器操作。与其他批量破坏性操作一样，建议先预览再执行。
+   */
+  opencodeVersionControllerPreviewCancel() {
+    const url = "/opencode-versions/cancel-release/preview"
+    const config: DocReqConfig = { url, method: "post" }
+    return this.request<types.ROpencodeVersionControllerPreviewCancel>(config)
+  }
+
+  /**
+   * @param { Boolean } rebuildContainers 是否同时把当前运行中的容器批量重建为镜像内置版本。Docker bind mount 在容器创建时锁定且无法摘除，只有重建才能让已有容器回到镜像版本。默认 false：只改变后续新建/重建容器的行为，不触碰正在运行的容器
+   * @summary 取消 opencode 二进制发版（取消接管）
+   * @description 把「受管二进制接管」状态切为未接管：后续创建与重建的容器不再追加二进制挂载，改用镜像内置 opencode。版本记录、灰度规则与激活历史全部保留，版本管理接口全程可用。Docker bind mount 在容器创建时锁定且无法摘除，已存在的容器仍使用其创建时挂载的二进制。传 rebuildContainers=true 可同时把这些容器逐个重建（docker rm + create，保留数据挂载），**会中断容器内正在进行的会话**。恢复接管无需额外接口：激活任意版本即自动恢复。
+   */
+  opencodeVersionControllerCancelRelease(rebuildContainers?: boolean) {
+    const body = { rebuildContainers }
+    const url = "/opencode-versions/cancel-release"
+    const config: DocReqConfig = { url, body, method: "post" }
+    return this.request<types.ROpencodeVersionControllerCancelRelease>(config)
   }
 
   /**
